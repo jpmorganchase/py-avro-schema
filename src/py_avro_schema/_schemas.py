@@ -496,7 +496,7 @@ class UnionSchema(Schema):
     def __init__(self, py_type: Type[Union[Any]], namespace: Optional[str] = None, options: Option = Option(0)):
         """
         An Avro union schema for a given Python union type
-        
+
         :param py_type:   The Python class to generate a schema for.
         :param namespace: The Avro namespace to add to schemas.
         :param options:   Schema generation options.
