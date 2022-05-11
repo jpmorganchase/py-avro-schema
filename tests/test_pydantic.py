@@ -1,6 +1,6 @@
 import re
-from typing import List, Optional
 import uuid
+from typing import List, Optional
 
 import pydantic
 import pytest

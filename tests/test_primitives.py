@@ -1,6 +1,15 @@
 import enum
 import re
-from typing import Dict, List, Mapping, MutableSequence, Optional, Sequence, Tuple, Union
+from typing import (
+    Dict,
+    List,
+    Mapping,
+    MutableSequence,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+)
 
 import pytest
 

@@ -12,8 +12,8 @@ import decimal
 import enum
 import inspect
 import sys
-from typing import Any, Dict, ForwardRef, List, Optional, Type, TYPE_CHECKING, Union
 import uuid
+from typing import TYPE_CHECKING, Any, Dict, ForwardRef, List, Optional, Type, Union
 
 import orjson
 import typeguard
