@@ -12,8 +12,8 @@ import decimal
 import enum
 import inspect
 import sys
-from typing import Any, Dict, ForwardRef, List, Optional, Type, TYPE_CHECKING, Union
 import uuid
+from typing import TYPE_CHECKING, Any, Dict, ForwardRef, List, Optional, Type, Union
 
 import orjson
 import typeguard
@@ -72,7 +72,13 @@ def schema(
 
 
 def _schema_obj(py_type: Type, namespace: Optional[str] = None, options: Option = Option(0)) -> "Schema":
-    """Dispatch to relevant schema classes"""
+    """
+    Dispatch to relevant schema classes
+
+    :param py_type:   The Python class to generate a schema for.
+    :param namespace: The Avro namespace to add to schemas.
+    :param options:   Schema generation options.
+    """
     # Find concrete Schema subclasses defined in the current module
     # TODO: make this pluggable and accept additional classes
     schema_classes = inspect.getmembers(
@@ -88,16 +94,29 @@ def _schema_obj(py_type: Type, namespace: Optional[str] = None, options: Option 
 
 
 class Schema(abc.ABC):
-    """Schema base class"""
+    """Schema base"""
 
     def __new__(cls, py_type: Type, namespace: Optional[str] = None, options: Option = Option(0)):
-        """Create an instance of this schema class if it handles py_type"""
+        """
+        Create an instance of this schema class if it handles py_type
+
+        :param py_type:   The Python class to generate a schema for.
+        :param namespace: The Avro namespace to add to schemas.
+        :param options:   Schema generation options.
+        """
         if cls.handles_type(py_type):
             return super().__new__(cls)
         else:
             return None
 
     def __init__(self, py_type: Type, namespace: Optional[str] = None, options: Option = Option(0)):
+        """
+        A schema base
+
+        :param py_type:   The Python class to generate a schema for.
+        :param namespace: The Avro namespace to add to schemas.
+        :param options:   Schema generation options.
+        """
         self.py_type = py_type
         self.options = options
         self._namespace = namespace  # Namespace override
@@ -412,6 +431,13 @@ class SequenceSchema(Schema):
         namespace: Optional[str] = None,
         options: Option = Option(0),
     ):
+        """
+        An Avro array schema for a given Python sequence
+
+        :param py_type:   The Python class to generate a schema for.
+        :param namespace: The Avro namespace to add to schemas.
+        :param options:   Schema generation options.
+        """
         super().__init__(py_type, namespace=namespace, options=options)
         self.items_schema = _schema_obj(py_type.__args__[0], namespace=namespace, options=options)  # type: ignore
 
@@ -438,6 +464,13 @@ class DictSchema(Schema):
         namespace: Optional[str] = None,
         options: Option = Option(0),
     ):
+        """
+        An Avro map schema for a given Python mapping
+
+        :param py_type:   The Python class to generate a schema for.
+        :param namespace: The Avro namespace to add to schemas.
+        :param options:   Schema generation options.
+        """
         super().__init__(py_type, namespace=namespace, options=options)
         if py_type.__args__[0] != str:  # type: ignore
             raise TypeError(f"Cannot generate Avro mapping schema for Python dictionary {py_type} with non-string keys")
@@ -461,6 +494,13 @@ class UnionSchema(Schema):
         return origin == Union
 
     def __init__(self, py_type: Type[Union[Any]], namespace: Optional[str] = None, options: Option = Option(0)):
+        """
+        An Avro union schema for a given Python union type
+
+        :param py_type:   The Python class to generate a schema for.
+        :param namespace: The Avro namespace to add to schemas.
+        :param options:   Schema generation options.
+        """
         super().__init__(py_type, namespace=namespace, options=options)
         self.item_schemas = [
             _schema_obj(arg, namespace=namespace, options=options) for arg in py_type.__args__  # type: ignore
@@ -492,10 +532,18 @@ class NamedSchema(Schema):
     """A named Avro schema base class"""
 
     def __init__(self, py_type: Type, namespace: Optional[str] = None, options: Option = Option(0)):
+        """
+        A named Avro schema base class
+
+        :param py_type:   The Python class to generate a schema for.
+        :param namespace: The Avro namespace to add to schemas.
+        :param options:   Schema generation options.
+        """
         super().__init__(py_type, namespace=namespace, options=options)
         self.name = py_type.__name__
 
     def __str__(self):
+        """Human rendering of the schema"""
         return self.fullname
 
     @property
@@ -528,6 +576,13 @@ class EnumSchema(NamedSchema):
         return inspect.isclass(py_type) and issubclass(py_type, enum.Enum)
 
     def __init__(self, py_type: Type[enum.Enum], namespace: Optional[str] = None, options: Option = Option(0)):
+        """
+        An Avro enum schema for a Python enum with string values
+
+        :param py_type:   The Python class to generate a schema for.
+        :param namespace: The Avro namespace to add to schemas.
+        :param options:   Schema generation options.
+        """
         super().__init__(py_type, namespace=namespace, options=options)
         self.symbols = [member.value for member in py_type]
         symbol_types = {type(symbol) for symbol in self.symbols}
@@ -560,6 +615,13 @@ class RecordSchema(NamedSchema):
     """An Avro record schema base class"""
 
     def __init__(self, py_type: Type, namespace: Optional[str] = None, options: Option = Option(0)):
+        """
+        An Avro record schema base class
+
+        :param py_type:   The Python class to generate a schema for.
+        :param namespace: The Avro namespace to add to schemas.
+        :param options:   Schema generation options.
+        """
         super().__init__(py_type, namespace=namespace, options=options)
         self.py_fields: collections.abc.Sequence[Any] = []
         self.record_fields: collections.abc.Sequence[RecordField] = []
@@ -592,6 +654,16 @@ class RecordField:
         docs: str = "",
         options: Option = Option(0),
     ):
+        """
+        An Avro record field
+
+        :param py_type:   The Python class or type
+        :param name:      Field name
+        :param namespace: Avro schema namespace
+        :param default:   Field default value
+        :param docs:      Field documentation or description
+        :param options:   Schema generation options
+        """
         self.py_type = py_type
         self.name = name
         self._namespace = namespace
@@ -609,6 +681,7 @@ class RecordField:
                 raise TypeError(f"Default value for field {self} is missing")
 
     def __str__(self):
+        """Human representation of the field"""
         return self.name
 
     def data(self, names: NamesType) -> JSONObj:
@@ -633,6 +706,13 @@ class DataclassSchema(RecordSchema):
         return dataclasses.is_dataclass(py_type)
 
     def __init__(self, py_type: Type, namespace: Optional[str] = None, options: Option = Option(0)):
+        """
+        An Avro record schema for a given Python dataclass
+
+        :param py_type:   The Python class to generate a schema for.
+        :param namespace: The Avro namespace to add to schemas.
+        :param options:   Schema generation options.
+        """
         super().__init__(py_type, namespace=namespace, options=options)
         self.py_fields = dataclasses.fields(py_type)
         self.record_fields = [self._record_field(field) for field in self.py_fields]
@@ -661,6 +741,13 @@ class PydanticSchema(RecordSchema):
         return hasattr(py_type, "__fields__")
 
     def __init__(self, py_type: Type[pydantic.BaseModel], namespace: Optional[str] = None, options: Option = Option(0)):
+        """
+        An Avro record schema for a given Pydantic model class
+
+        :param py_type:   The Python class to generate a schema for.
+        :param namespace: The Avro namespace to add to schemas.
+        :param options:   Schema generation options.
+        """
         super().__init__(py_type, namespace=namespace, options=options)
         self.py_fields = list(py_type.__fields__.values())
         self.record_fields = [self._record_field(field) for field in self.py_fields]
@@ -689,6 +776,7 @@ class PydanticSchema(RecordSchema):
 
 
 def _doc_for_class(py_type: Type) -> str:
+    """Return the first line of the docstring for a given class, if any"""
     doc = inspect.getdoc(py_type)
     if doc:
         # Take the first sentence

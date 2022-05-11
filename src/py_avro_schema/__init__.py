@@ -74,9 +74,9 @@ def generate(
 
     This function is cached and can be called repeatedly with the same arguments without any performance penalty.
 
-    :param py_type:    The Python class to generate a schema for
-    :param namespace:  The Avro namespace to add to schemas
-    :param options:    Option flags, specify multiple values like this: ``Option.INT_32 | Option.FLOAT_32``
+    :param py_type:   The Python class to generate a schema for.
+    :param namespace: The Avro namespace to add to schemas.
+    :param options:   Schema generation options, specify multiple values like this: ``Option.INT_32 | Option.FLOAT_32``.
     """
     schema_dict = schema(py_type, namespace=namespace, options=options)
     json_options = 0
