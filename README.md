@@ -22,6 +22,7 @@ The `py-avro-schema` package is installed in
 
 Run tests by simply calling `tox`.
 
+Install code quality Git hooks using `pre-commit install --install-hooks`.
 
 ## Contributing
 
