@@ -29,7 +29,11 @@ repos:
     hooks:
       - # Insert an OSS license header to all relevant files
         id: insert-license
-        files: \.(cfg|ini|py|yml)$
+        types_or:
+          - ini
+          - python
+          - toml
+          - yaml
         args:
           - --license-filepath
           - LICENSE_HEADER.txt
