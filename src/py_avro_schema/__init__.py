@@ -71,6 +71,16 @@ import orjson
 from py_avro_schema._schemas import JSON_OPTIONS, Option, schema
 from py_avro_schema._typing import DecimalType
 
+try:
+    from importlib import metadata
+except ImportError:  # pragma: no cover
+    # Python < 3.8
+    import importlib_metadata as metadata  # type: ignore
+
+#: Library version, e.g. 1.0.0, taken from Git tags
+__version__ = metadata.version("py-avro-schema")
+
+
 __all__ = [
     "generate",
     "DecimalType",

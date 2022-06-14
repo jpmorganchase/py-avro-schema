@@ -17,6 +17,10 @@ import orjson
 import py_avro_schema as pas
 
 
+def test_package_has_version():
+    assert pas.__version__ is not None
+
+
 def test_dataclass_string_field():
     @dataclasses.dataclass
     class PyType:
