@@ -31,6 +31,8 @@ An example data structure could be defined like this in Python::
 
 This defines a single type :class:`Ship` with 2 fields: ``name`` (some text) and ``year_launched`` (a number).
 
+The type hints are essential and used by **py-avro-schema** to generate the Avro schema!
+
 
 Generating the Avro schema
 --------------------------
