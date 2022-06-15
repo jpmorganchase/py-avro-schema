@@ -8,5 +8,19 @@
    See the License for the specific language governing permissions and limitations under the License.
 
 py-avro-schema
+==============
 
-Generate Apache Avro schemas for Python types
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   tutorial
+
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
