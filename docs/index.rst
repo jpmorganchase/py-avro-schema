@@ -15,7 +15,7 @@ Generate Apache Avro schemas for Python types
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
 
    tutorial
 
