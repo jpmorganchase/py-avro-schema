@@ -18,6 +18,7 @@ Generate Apache Avro schemas for Python types
    :caption: Contents
 
    tutorial
+   modules
 
 
 Indices and tables
