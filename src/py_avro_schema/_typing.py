@@ -24,8 +24,8 @@ class DecimalType:
     """
     A decimal type for type annotations including hints for precision and scale
 
-    Usage
-    -----
+    Example
+    -------
 
        >>> import decimal
        >>> my_decimal: DecimalType[4, 2] = decimal.Decimal("12.34")
