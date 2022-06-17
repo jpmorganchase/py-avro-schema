@@ -1,0 +1,7 @@
+# Top level requirements for reproducible Sphinx builds.
+#
+# To upgrade the top level dependency version, or upgrade transitive dependencies, pip install pip-tools and run:
+#
+# pip-compile --upgrade --no-emit-index-url requirements.in
+
+sphinx==5.0.1
