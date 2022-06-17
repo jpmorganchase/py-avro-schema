@@ -14,8 +14,11 @@ build:
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
   configuration: docs/conf.py
+  fail_on_warning: true    # https://docs.readthedocs.io/en/stable/tutorial/index.html#making-warnings-more-visible
 
 # Optionally declare the Python requirements required to build your docs
 python:
   install:
     - requirements: docs/requirements.txt
+    - method: pip          # https://docs.readthedocs.io/en/stable/tutorial/index.html#making-warnings-more-visible
+      path: .
