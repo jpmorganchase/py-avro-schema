@@ -1,8 +1,5 @@
-py\_avro\_schema package
-========================
-
-Module contents
----------------
+py\_avro\_schema
+================
 
 .. automodule:: py_avro_schema
    :members:
