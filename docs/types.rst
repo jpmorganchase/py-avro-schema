@@ -214,7 +214,7 @@ Example::
        """A beautiful ship"""
 
        name: str
-       year_launched: Optional[int] = pydantic.Field(None, description="The year the ship hit the water")
+       year_launched: Optional[int] = pydantic.Field(None, description="When we hit the water")
 
 Is output as:
 
@@ -234,7 +234,7 @@ Is output as:
          "name": "year_launched",
          "type": ["null", "long"],
          "default": null,
-         "doc": "The year the ship hit the water"
+         "doc": "When we hit the water"
        }
      ],
    }
