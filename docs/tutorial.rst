@@ -19,18 +19,19 @@ Define data types and structures
 
 An example data structure could be defined like this in Python::
 
-    # File shipping/models.py
-    import dataclasses
+   # File shipping/models.py
+
+   import dataclasses
 
 
-    @dataclasses.dataclass
-    class Ship:
-        """A beautiful ship"""
+   @dataclasses.dataclass
+   class Ship:
+       """A beautiful ship"""
 
-        name: str
-        year_launched: int
+       name: str
+       year_launched: int
 
-This defines a single type :class:`Ship` with 2 fields: ``name`` (some text) and ``year_launched`` (a number).
+This defines a single type ``Ship`` with 2 fields: ``name`` (some text) and ``year_launched`` (a number).
 
 The type hints are essential and used by **py-avro-schema** to generate the Avro schema!
 
@@ -76,13 +77,35 @@ Controlling the schema namespace
 
 Avro named types such as a ``Record`` optionally define a "namespace" to qualify their name.
 
-**py-avro-schema** populates the namespace with the Python *package* name within which the Python type is defined.
-The recommended pattern is to define (or import-as) the types into a package's ``__init__.py`` module such that the types are importable from a package as populated in the Avro schema namespace.
+
+Package name
+~~~~~~~~~~~~
+
+By default, **py-avro-schema** populates the namespace with the Python *package* name within which the Python type is defined.
+For example, if the type ``Ship`` is defined in module ``shipping.models``, the namespace will be ``shipping``.
+
+A good pattern is to define (or import-as) the types into a package's ``__init__.py`` module such that the types are importable using the Avro schema namespace exactly.
+For example::
+
+   # File shipping/__init__.py
+
+   from shipping.models import Ship
+
+   __all__ = ["Ship"]
+
 This can be really useful for deserializing Avro data into Python objects.
 
-*Disable* automatic namespace population like this:
+
+Module name
+~~~~~~~~~~~
+
+Alternatively, to use the full dotted module name (``shipping.models`` in the above example) instead of the top-level package name use the option :attr:`py_avro_schema.Option.AUTO_NAMESPACE_MODULE`.
+
+
+No namespace
+~~~~~~~~~~~~
+
+To *disable* automatic namespace population altogether, use this:
 
 >>> pas.generate(Ship, options=pas.Option.NO_AUTO_NAMESPACE)
 b'{"type":"record","name":"Ship","fields":[{"name":"name","type":"string"},{"name":"year_launched","type":"long"}],"doc":"A beautiful ship"}'
-
-Alternatively, to use the full dotted module name (for example :mod:`shipping.models`) instead of the top-level package name (:mod:`shipping`) use the option :attr:`pas.Option.AUTO_NAMESPACE_MODULE`.
