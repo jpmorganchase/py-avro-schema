@@ -32,7 +32,7 @@ Avro schema: ``bytes``
 
 
 :func:`dataclasses.dataclass`
-------------------------------
+-----------------------------
 
 Supports Python classes decorated with :func:`dataclasses.dataclass`.
 
@@ -89,14 +89,14 @@ Recursive or repeated reference to the same Python dataclass is supported. After
 
 
 :class:`datetime.date`
-------------------
+----------------------
 
 | Avro schema: ``int``
 | Avro logical type: ``date``
 
 
 :class:`datetime.datetime`
-------------------
+--------------------------
 
 | Avro schema: ``long``
 | Avro logical type: ``timestamp-micros``
@@ -105,7 +105,7 @@ To output with millisecond precision instead (logical type ``timestamp-millis``)
 
 
 :class:`datetime.time`
-------------------
+----------------------
 
 | Avro schema: ``long``
 | Avro logical type: ``time-micros``
