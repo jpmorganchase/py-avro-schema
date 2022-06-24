@@ -134,6 +134,21 @@ Outputs as:
    }
 
 
+:class:`typing.Dict`
+--------------------
+
+Avro schema: ``map``
+
+Avro ``map`` schemas support **string** keys only. Map values can be any other Python type supported by **py-avro-schema**. For example, ``Dict[str, int]`` is output as:
+
+.. code-block:: json
+
+   {
+     "type": "map",
+     "values": "long"
+   }
+
+
 :class:`uuid.UUID`
 ------------------
 
