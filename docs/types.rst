@@ -47,6 +47,35 @@ Avro schema: ``bytes``
 To output with millisecond precision instead (logical type ``timestamp-millis``), use :attr:`py_avro_schema.Option.MILLISECONDS`.
 
 
+:class:`datetime.time`
+------------------
+
+| Avro schema: ``long``
+| Avro logical type: ``time-micros``
+
+To output with millisecond precision instead (logical type ``time-millis``), use :attr:`py_avro_schema.Option.MILLISECONDS`.
+
+
+:class:`datetime.timedelta`
+---------------------------
+
+| Avro schema: ``fixed``
+| Avro logical type: ``duration``
+
+The Avro ``fixed`` type is a named schema.
+Here, **py-avro-schema** uses the name ``datetime.timedelta``.
+The full generated schema looks like this:
+
+.. code-block:: json
+
+   {
+     "type": "fixed",
+     "name": "datetime.timedelta",
+     "size": 12,
+     "logicalType": "duration"
+   }
+
+
 :class:`float`
 --------------
 
@@ -103,7 +132,6 @@ Outputs as:
      "type": "string",
      "namedString": "shipping.PortName"
    }
-
 
 
 :class:`uuid.UUID`
