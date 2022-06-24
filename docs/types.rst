@@ -149,6 +149,23 @@ Avro ``map`` schemas support **string** keys only. Map values can be any other P
    }
 
 
+:class:`typing.Sequence`
+------------------------
+
+Avro schema: ``array``
+
+This supports other "generic type" versions of :class:`collections.abc.Sequence`, including :class:`typing.List`.
+
+Sequence values can be any Python type supported by **py-avro-schema**. For example, ``List[int]`` is output as:
+
+.. code-block:: json
+
+   {
+     "type": "array",
+     "values": "long"
+   }
+
+
 :class:`uuid.UUID`
 ------------------
 
