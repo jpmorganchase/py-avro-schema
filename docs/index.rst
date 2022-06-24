@@ -23,7 +23,7 @@ Generate Apache Avro schemas for Python types
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
