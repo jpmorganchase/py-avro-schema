@@ -82,3 +82,11 @@ Outputs as:
      "type": "string",
      "namedString": "shipping.PortName"
    }
+
+
+
+:class:`uuid.UUID`
+------------------
+
+| Avro schema: ``string``
+| Avro logical type: ``uuid``
