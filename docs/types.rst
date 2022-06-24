@@ -76,6 +76,38 @@ The full generated schema looks like this:
    }
 
 
+:class:`enum.Enum`
+------------------
+
+Avro schema: ``enum``
+
+The Avro ``enum`` type is a named schema. **py-avro-schema** uses the Python class name as the schema name. Avro enum symbols must be strings.
+
+Example::
+
+   # File shipping/models.py
+
+   import enum
+
+   class ShipType(enum.Enum):
+       SAILING_VESSEL = "SAILING_VESSEL"
+       MOTOR_VESSEL = "MOTOR_VESSEL"
+
+Outputs as:
+
+.. code-block:: json
+
+   {
+     "type": "enum",
+     "name": "ShipType",
+     "namespace": "shipping",
+     "symbols": ["SAILING_VESSEL", "MOTOR_VESSEL"],
+     "default": "SAILING_VESSEL"
+   }
+
+The default value is taken from the first defined enum symbol and is used to support writer/reader schema resolution.
+
+
 :class:`float`
 --------------
 
