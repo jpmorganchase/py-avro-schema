@@ -191,8 +191,8 @@ Avro schema: ``null``
 This schema is typically used as a "unioned" type where the default value is ``None``.
 
 
-:class:``pydantic.BaseModel``
------------------------------
+:class:`pydantic.BaseModel`
+---------------------------
 
 Supports Python classes inheriting from :class:`pydantic.BaseModel`.
 
@@ -214,7 +214,7 @@ Example::
        """A beautiful ship"""
 
        name: str
-       year_launched: Optional[int] = None
+       year_launched: Optional[int] = pydantic.Field(None, description="The year the ship hit the water")
 
 Is output as:
 
@@ -233,7 +233,8 @@ Is output as:
        {
          "name": "year_launched",
          "type": ["null", "long"],
-         "default": null
+         "default": null,
+         "doc": "The year the ship hit the water"
        }
      ],
    }
