@@ -11,6 +11,11 @@
 Supported data types
 ====================
 
+.. seealso::
+
+   Official Avro schema specification: https://avro.apache.org/docs/current/spec.html#schemas
+
+
 **py-avro-schema** supports the following Python types:
 
 
@@ -24,6 +29,13 @@ Avro schema: ``boolean``
 --------------
 
 Avro schema: ``bytes``
+
+
+:class:`datetime.date`
+------------------
+
+| Avro schema: ``int``
+| Avro logical type: ``date``
 
 
 :class:`float`
