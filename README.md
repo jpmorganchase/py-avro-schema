@@ -2,6 +2,9 @@
 
 Generate Apache Avro schemas for Python types.
 
+Documentation: https://py-avro-schema.readthedocs.io/
+
+
 ## Installing
 
 ```shell
