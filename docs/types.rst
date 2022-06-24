@@ -38,6 +38,15 @@ Avro schema: ``bytes``
 | Avro logical type: ``date``
 
 
+:class:`datetime.datetime`
+------------------
+
+| Avro schema: ``long``
+| Avro logical type: ``timestamp-micros``
+
+To output with millisecond precision instead (logical type ``timestamp-millis``), use :attr:`py_avro_schema.Option.MILLISECONDS`.
+
+
 :class:`float`
 --------------
 
