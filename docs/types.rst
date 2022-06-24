@@ -191,6 +191,63 @@ Avro schema: ``null``
 This schema is typically used as a "unioned" type where the default value is ``None``.
 
 
+:class:``pydantic.BaseModel``
+-----------------------------
+
+Supports Python classes inheriting from :class:`pydantic.BaseModel`.
+
+Avro schema: ``record``
+
+The Avro ``record`` type is a named schema.
+**py-avro-schema** uses the Python class name as the schema name.
+
+Pydantic model fields with types supported by **py-avro-schema** are output as expected, including population of default values and descriptions.
+
+Example::
+
+   # File shipping/models.py
+
+   import pydantic
+   from typing import Optional
+
+   class Ship(pydantic.BaseModel):
+       """A beautiful ship"""
+
+       name: str
+       year_launched: Optional[int] = None
+
+Is output as:
+
+.. code-block:: json
+
+   {
+     "type": "record",
+     "name": "Ship",
+     "namespace": "shipping",
+     "doc": "A beautiful ship",
+     "fields": [
+       {
+         "name": "name",
+         "type": "string"
+       },
+       {
+         "name": "year_launched",
+         "type": ["null", "long"],
+         "default": null
+       }
+     ],
+   }
+
+Field default values may improve Avro schema evolution and resolution.
+To validate that all model fields are specified with a default value, use option :attr:`py_avro_schema.Option.DEFAULTS_MANDATORY`.
+
+The Avro record schema's ``doc`` attribute is populated from the Python class's docstring. 
+For individual model fields, the ``doc`` attribute is taken from the Pydantic field's :attr:`description` attribute.
+To *disable* this, pass the option :attr:`py_avro_schema.Option.NO_DOC`.
+
+Recursive or repeated reference to the same Pydantic class is supported. After the first time the schema is output, any subsequent references are by name only.
+
+
 :class:`str`
 ------------
 
