@@ -108,7 +108,7 @@ Manual
 A custom namespace can be specified like this:
 
 >>> pas.generate(shipping.models.Ship, namespace="com.shipping.schemas")
-b'{"type":"record","name":"Ship","fields":[...],"namespace":"com.shipping.schemas","doc":"A beautiful ship"}'
+b'{"type":"record","name":"Ship","fields":[...],"namespace":"com.shipping.schemas", ...}'
 
 
 No namespace
@@ -117,4 +117,4 @@ No namespace
 To *disable* automatic namespace population altogether, use this:
 
 >>> pas.generate(Ship, options=pas.Option.NO_AUTO_NAMESPACE)
-b'{"type":"record","name":"Ship","fields":[{"name":"name","type":"string"},{"name":"year_launched","type":"long"}],"doc":"A beautiful ship"}'
+b'{"type":"record","name":"Ship","fields":[...],"doc":"A beautiful ship"}'
