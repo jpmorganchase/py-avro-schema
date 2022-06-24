@@ -31,6 +31,63 @@ Avro schema: ``boolean``
 Avro schema: ``bytes``
 
 
+:func:`dataclasses.dataclass`
+------------------------------
+
+Supports Python classes decorated with :func:`dataclasses.dataclass`.
+
+Avro schema: ``record``
+
+The Avro ``record`` type is a named schema.
+**py-avro-schema** uses the Python class name as the schema name.
+
+Dataclass fields with types supported by **py-avro-schema** are output as expected, including population of default values.
+
+Example::
+
+   # File shipping/models.py
+
+   import dataclasses
+   from typing import Optional
+
+   @dataclasses.dataclass
+   class Ship:
+       """A beautiful ship"""
+
+       name: str
+       year_launched: Optional[int] = None
+
+Is output as:
+
+.. code-block:: json
+
+   {
+     "type": "record",
+     "name": "Ship",
+     "namespace": "shipping",
+     "doc": "A beautiful ship",
+     "fields": [
+       {
+         "name": "name",
+         "type": "string"
+       },
+       {
+         "name": "year_launched",
+         "type": ["null", "long"],
+         "default": null
+       }
+     ],
+   }
+
+Field default values may improve Avro schema evolution and resolution.
+To validate that all dataclass fields are specified with a default value, use option :attr:`py_avro_schema.Option.DEFAULTS_MANDATORY`.
+
+The Avro record schema's ``doc`` field is populated from the Python class's docstring.
+To *disable* this, pass the option :attr:`py_avro_schema.Option.NO_DOC`.
+
+Recursive or repeated reference to the same Python dataclass is supported. After the first time the schema is output, any subsequent references are by name only.
+
+
 :class:`datetime.date`
 ------------------
 
@@ -81,7 +138,9 @@ The full generated schema looks like this:
 
 Avro schema: ``enum``
 
-The Avro ``enum`` type is a named schema. **py-avro-schema** uses the Python class name as the schema name. Avro enum symbols must be strings.
+The Avro ``enum`` type is a named schema.
+**py-avro-schema** uses the Python class name as the schema name.
+Avro enum symbols must be strings.
 
 Example::
 
