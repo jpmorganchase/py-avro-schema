@@ -198,6 +198,16 @@ Sequence values can be any Python type supported by **py-avro-schema**. For exam
    }
 
 
+:class:`typing.Union`
+---------------------
+
+Avro schema: JSON array of multiple Avro schemas
+
+Union members can be any other type supported by **py-avro-schema**.
+
+When defined as a class field with a **default** value, the union members may be re-ordered to ensure that the first member matches the type of the default value.
+
+
 :class:`uuid.UUID`
 ------------------
 
