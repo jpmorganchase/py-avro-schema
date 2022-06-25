@@ -249,6 +249,35 @@ To *disable* this, pass the option :attr:`py_avro_schema.Option.NO_DOC`.
 Recursive or repeated reference to the same Pydantic class is supported. After the first time the schema is output, any subsequent references are by name only.
 
 
+:class:`py_avro_schema.DecimalType`
+-----------------------------------
+
+| Avro schema: ``bytes``
+| Avro logical type: ``decimal``
+
+:class:`py_avro_schema.DecimalType` is a generic type for standard library :class:`decimal.Decimal` values. 
+The generic type is used to define the **scale** and **precision** of a field.
+
+For example, a decimal field with precision 4 and scale 2 is defined like this::
+
+   import py_avro_schema as pas
+   
+   construction_costs: pas.DecimalType[4, 2]
+   
+Values can be assigned like normal, e.g. ``construction_costs = decimal.Decimal("12.34")``.
+   
+The Avro schema for the above type is:
+
+.. code-block:: json
+
+   {
+     "type": "bytes",
+     "logicalType": "decimal",
+     "precision": 4,
+     "scale": 2
+   }
+
+
 :class:`str`
 ------------
 
