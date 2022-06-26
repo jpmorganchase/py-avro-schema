@@ -312,10 +312,12 @@ Outputs as:
    }
 
 
-:class:`typing.Dict`
---------------------
+:class:`typing.Mapping`
+-----------------------
 
 Avro schema: ``map``
+
+This supports other "generic type" versions of :class:`collections.abc.Mapping`, including :class:`typing.Dict`.
 
 Avro ``map`` schemas support **string** keys only. Map values can be any other Python type supported by **py-avro-schema**. For example, ``Dict[str, int]`` is output as:
 
