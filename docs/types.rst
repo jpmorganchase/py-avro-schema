@@ -312,6 +312,18 @@ Outputs as:
    }
 
 
+:class:`typing.Dict[str, typing.Any]`
+-------------------------------------
+
+| Avro schema: ``bytes``
+| Avro logical type: ``json``
+
+Arbitrary Python dictionaries could be serialized as a ``bytes`` Avro schema by first serializing the data as JSON. 
+**py-avro-schema** supports this "JSON-in-Avro" approach by adding the **custom** logical type ``json`` to a ``bytes`` schema.
+
+To support JSON serialization as *strings* instead of *bytes*, use :attr:`py_avro_schema.Option.LOGICAL_JSON_STRING`.
+
+
 :class:`typing.Mapping`
 -----------------------
 
