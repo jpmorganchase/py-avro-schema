@@ -315,6 +315,11 @@ Outputs as:
 :class:`typing.Dict[str, typing.Any]`
 -------------------------------------
 
+.. seealso::
+
+   For a "normal" Avro ``map`` schema using fully typed Python dictionaries, see :ref:`class-typing-mapping`.
+
+
 | Avro schema: ``bytes``
 | Avro logical type: ``json``
 
@@ -323,6 +328,8 @@ Arbitrary Python dictionaries could be serialized as a ``bytes`` Avro schema by 
 
 To support JSON serialization as *strings* instead of *bytes*, use :attr:`py_avro_schema.Option.LOGICAL_JSON_STRING`.
 
+
+.. _class-typing-mapping:
 
 :class:`typing.Mapping`
 -----------------------
