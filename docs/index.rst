@@ -18,11 +18,12 @@ Generate Apache Avro schemas for Python types
    :caption: Contents
 
    tutorial
+   types
    modules
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`

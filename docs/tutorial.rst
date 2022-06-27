@@ -102,10 +102,19 @@ Module name
 Alternatively, to use the full dotted module name (``shipping.models`` in the above example) instead of the top-level package name use the option :attr:`py_avro_schema.Option.AUTO_NAMESPACE_MODULE`.
 
 
+Manual
+~~~~~~
+
+A custom namespace can be specified like this:
+
+>>> pas.generate(shipping.models.Ship, namespace="com.shipping.schemas")
+b'{"type":"record","name":"Ship","fields":[...],"namespace":"com.shipping.schemas", ...}'
+
+
 No namespace
 ~~~~~~~~~~~~
 
 To *disable* automatic namespace population altogether, use this:
 
 >>> pas.generate(Ship, options=pas.Option.NO_AUTO_NAMESPACE)
-b'{"type":"record","name":"Ship","fields":[{"name":"name","type":"string"},{"name":"year_launched","type":"long"}],"doc":"A beautiful ship"}'
+b'{"type":"record","name":"Ship","fields":[...],"doc":"A beautiful ship"}'
