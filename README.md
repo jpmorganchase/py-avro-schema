@@ -41,4 +41,4 @@ specific language governing permissions and limitations under the License.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md)
+See [CONTRIBUTING.md](https://github.com/jpmorganchase/.github/blob/main/CONTRIBUTING.md)
