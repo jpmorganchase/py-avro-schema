@@ -11,7 +11,7 @@
 py-avro-schema
 ==============
 
-Generate Apache Avro schemas for Python types
+Generate Apache Avro schemas for Python types including standard library data-classes and Pydantic data models.
 
 .. toctree::
    :maxdepth: 2
