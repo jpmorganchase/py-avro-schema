@@ -31,8 +31,11 @@ author = "J.P. Morgan Chase & Co."
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosectionlabel",
     "sphinx.ext.napoleon",
 ]
+
+autosectionlabel_prefix_document = True
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
