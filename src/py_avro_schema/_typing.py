@@ -27,11 +27,10 @@ class DecimalType:
     Example
     -------
 
-       >>> import decimal
-       >>> my_decimal: DecimalType[4, 2] = decimal.Decimal("12.34")
+    >>> import decimal
+    >>> my_decimal: DecimalType[4, 2] = decimal.Decimal("12.34")
 
     Here, the subscript ``(4, 2)`` refers to the precision and scale of decimal numbers.
-
     """
 
     @typeguard.typechecked()

@@ -83,7 +83,9 @@ Recursive or repeated reference to the same Python dataclass is supported. After
 :class:`pydantic.BaseModel`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Supports Python classes inheriting from :class:`pydantic.BaseModel`.
+Supports Python classes inheriting from `pydantic.BaseModel <https://pydantic-docs.helpmanual.io/usage/models/>`_.
+
+.. (No intersphinx for Pydantic, unfortunately.)
 
 Avro schema: ``record``
 
@@ -157,7 +159,7 @@ Collections
 
 .. seealso::
 
-   For a "normal" Avro ``map`` schema using fully typed Python dictionaries, see :ref:`class-typing-mapping`.
+   For a "normal" Avro ``map`` schema using fully typed Python dictionaries, see :ref:`types::class:`typing.mapping``.
 
 
 | Avro schema: ``bytes``
@@ -168,8 +170,6 @@ Arbitrary Python dictionaries could be serialized as a ``bytes`` Avro schema by 
 
 To support JSON serialization as *strings* instead of *bytes*, use :attr:`py_avro_schema.Option.LOGICAL_JSON_STRING`.
 
-
-.. _class-typing-mapping:
 
 :class:`typing.Mapping`
 ~~~~~~~~~~~~~~~~~~~~~~~
