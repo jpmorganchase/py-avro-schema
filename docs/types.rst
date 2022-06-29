@@ -83,7 +83,9 @@ Recursive or repeated reference to the same Python dataclass is supported. After
 :class:`pydantic.BaseModel`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Supports Python classes inheriting from :class:`pydantic.BaseModel`.
+Supports Python classes inheriting from `pydantic.BaseModel <https://pydantic-docs.helpmanual.io/usage/models/>`_.
+
+.. (No intersphinx for Pydantic, unfortunately.)
 
 Avro schema: ``record``
 
