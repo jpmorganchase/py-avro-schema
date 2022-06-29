@@ -13,12 +13,13 @@
 """
 Generate Apache Avro schemas for Python types including standard library data-classes and Pydantic data models.
 
+The main API is a single function, :func:`generate`. Its first argument is the Python type or class to generate the Avro
+schema for.
+
 .. seealso::
 
    Data types supported by **py-avro-schema**: :doc:`types`.
 
-The main API is a single function, :func:`generate`. Its first argument is the Python type or class to generate the Avro
-schema for.
 """
 
 import functools
