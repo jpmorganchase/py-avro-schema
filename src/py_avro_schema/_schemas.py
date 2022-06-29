@@ -43,19 +43,48 @@ NamesType = List[str]
 
 
 class Option(enum.Flag):
-    """Schema generation options"""
+    """
+    Schema generation options
 
+    Options can be passed in to the function :func:`py_avro_schema.generate`. Multiple values are specified like this::
+
+       Option.INT_32 | Option.FLOAT_32
+    """
+
+    #: Format JSON data using 2 spaces indentation
     JSON_INDENT_2 = orjson.OPT_INDENT_2
+
+    #: Sort keys in JSON data
     JSON_SORT_KEYS = orjson.OPT_SORT_KEYS
+
+    #: Append a newline character at the end of the JSON data
     JSON_APPEND_NEWLINE = orjson.OPT_APPEND_NEWLINE  # type: ignore
-    INT_32 = enum.auto()  # Use "int" schemas instead of "long" schemas
-    FLOAT_32 = enum.auto()  # Use "float" schemas instead of "double" schemas
-    MILLISECONDS = enum.auto()  # Use milliseconds instead of microseconds precision for (date)time schemas
-    DEFAULTS_MANDATORY = enum.auto()  # Mandate default values for all dataclass fields
-    LOGICAL_JSON_STRING = enum.auto()  # Model Dict[str, Any] fields as JSON strings instead of JSON bytes
-    NO_AUTO_NAMESPACE = enum.auto()  # Do not auto-populate namespaces
-    AUTO_NAMESPACE_MODULE = enum.auto()  # Populate namespaces using full module name instead of the top-level package
-    NO_DOC = enum.auto()  # Do not populate "doc" schema attributes
+
+    #: Use ``int`` schemas (32-bit) instead of ``long`` schemas (64-bit) for Python :class:`int`.
+    INT_32 = enum.auto()
+
+    #: Use ``float`` schemas (32-bit) instead of ``double`` schemas (64-bit) for Python class :class:`float`.
+    FLOAT_32 = enum.auto()
+
+    #: Use milliseconds instead of microseconds precision for (date)time schemas
+    MILLISECONDS = enum.auto()
+
+    #: Mandate default values to be specified for all dataclass fields. This option may be used to enforce default
+    #: values on Avro record fields to support schema evolution/resolution.
+    DEFAULTS_MANDATORY = enum.auto()
+
+    #: Model ``Dict[str, Any]`` fields as string schemas instead of byte schemas (with logical type ``json``, to support
+    #: JSON serialization inside Avro).
+    LOGICAL_JSON_STRING = enum.auto()
+
+    #: Do not populate namespaces automatically based on the package a Python class is defined in.
+    NO_AUTO_NAMESPACE = enum.auto()
+
+    #: Automatically populate namespaces using full (dotted) module names instead of top-level package names.
+    AUTO_NAMESPACE_MODULE = enum.auto()
+
+    #: Do not populate ``doc`` schema attributes based on Python docstrings
+    NO_DOC = enum.auto()
 
 
 JSON_OPTIONS = [opt for opt in Option if opt.name and opt.name.startswith("JSON_")]
@@ -75,6 +104,7 @@ def schema(
     :param py_type:   The type/class to generate the schema for.
     :param namespace: The Avro namespace to add to all named schemas.
     :param names:     Sequence of Avro schema names to track previously defined named schemas.
+    :param options:   Schema generation options, specify multiple values like this: ``Option.INT_32 | Option.FLOAT_32``.
     """
     if names is None:
         names = []

@@ -41,26 +41,7 @@ Then, generate the corresponding Avro schema like this::
    >>> pas.generate(Ship, namespace="my_package")
    b'{"type":"record","name":"Ship","fields":[{"name":"name","type":"string","default":""},...'
 
-The ``options`` argument supports the following :class:`Option` enum-values:
-
-===================== ==================================================================================================
-Option                Description
-===================== ==================================================================================================
-INT_32                Use "int" schemas instead of "long" schemas
-FLOAT_32              Use "float" schemas instead of "double" schemas
-MILLISECONDS          Use milliseconds instead of microseconds precision for (date)time schemas
-DEFAULTS_MANDATORY    Mandate default values to be specified for all dataclass fields. This option may be used to
-                      enforce default values on Avro record fields to support schema evoluation/resolution.
-LOGICAL_JSON_STRING   Model Dict[str, Any] fields as string schemas instead of byte schemas (with logical type "json",
-                      to support JSON serialization inside Avro).
-NO_AUTO_NAMESPACE     Do not populate namespaces automatically based on the package a Python class is defined in.
-AUTO_NAMESPACE_MODULE Automatically populate namespaces using full (dotted) module names instead of top-level package
-                      names.
-JSON_INDENT_2         Format JSON data using 2 spaces indentation
-JSON_SORT_KEYS        Sort keys in JSON data
-JSON_APPEND_NEWLINE   Append a newline character at the end of the JSON data
-===================== ==================================================================================================
-
+The ``options`` argument accepts 1 or more :class:`Option` enum-values.
 """
 
 import functools
