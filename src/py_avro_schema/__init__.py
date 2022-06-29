@@ -11,37 +11,14 @@
 
 
 """
-Generate Avro schemas for any Python (nested) dataclass or Pydantic model.
+Generate Apache Avro schemas for Python types including standard library data-classes and Pydantic data models.
 
+.. seealso::
 
-Usage
------
+   Data types supported by **py-avro-schema**: :doc:`types`.
 
-First, define a Python data structure like this::
-
-   >>> from typing import List
-   >>> import dataclasses
-
-   >>> @dataclasses.dataclass
-   ... class Person:
-   ...     name: str = ""
-   ...
-   >>> @dataclasses.dataclass
-   ... class Ship:
-   ...     name: str = ""
-   ...     crew: List[Person] = dataclasses.field(default_factory=list)
-   ...
-
-Pydantic models can also be used instead of dataclasses. "Normal" Python classes cannot be used to construct Avro record
-schemas because there is no way to determine the attributes and their types from the class definition.
-
-Then, generate the corresponding Avro schema like this::
-
-   >>> import py_avro_schema as pas
-   >>> pas.generate(Ship, namespace="my_package")
-   b'{"type":"record","name":"Ship","fields":[{"name":"name","type":"string","default":""},...'
-
-The ``options`` argument accepts 1 or more :class:`Option` enum-values.
+The main API is a single function, :func:`generate`. Its first argument is the Python type or class to generate the Avro
+schema for.
 """
 
 import functools
@@ -83,7 +60,8 @@ def generate(
 
     :param py_type:   The Python class to generate a schema for.
     :param namespace: The Avro namespace to add to schemas.
-    :param options:   Schema generation options, specify multiple values like this: ``Option.INT_32 | Option.FLOAT_32``.
+    :param options:   Schema generation options as defined by :class:`Option` enum values. Specify multiple values like
+                      this: ``Option.INT_32 | Option.FLOAT_32``.
     """
     schema_dict = schema(py_type, namespace=namespace, options=options)
     json_options = 0

@@ -104,7 +104,8 @@ def schema(
     :param py_type:   The type/class to generate the schema for.
     :param namespace: The Avro namespace to add to all named schemas.
     :param names:     Sequence of Avro schema names to track previously defined named schemas.
-    :param options:   Schema generation options, specify multiple values like this: ``Option.INT_32 | Option.FLOAT_32``.
+    :param options:   Schema generation options as defined by :class:`Option` enum values. Specify multiple values like
+                      this: ``Option.INT_32 | Option.FLOAT_32``.
     """
     if names is None:
         names = []
