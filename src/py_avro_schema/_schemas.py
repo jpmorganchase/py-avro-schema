@@ -205,31 +205,37 @@ class PrimitiveSchema(Schema):
 
     # TODO: implement make_default for bool
 
-    # Mapping from Python types to Avro primitive schemas
-    primitive_types = {
-        bool: "boolean",
-        bytes: "bytes",
-        float: "double",  # By default return "double" (64 bit) schema for Python floats
-        int: "long",  # By default return "long" (64 bit) schema for Python integers
-        str: "string",
-        type(None): "null",
-    }
+    primitive_types = [
+        # Tuple of (Python type, whether to include subclasses too, Avro schema)
+        (bool, True, "boolean"),
+        (bytes, True, "bytes"),
+        (float, True, "double"),  # Return "double" (64 bit) schema for Python floats by default
+        (int, True, "long"),  # Return "long" (64 bit) schema for Python integers by default
+        (str, False, "string"),  # :class:`StrSubclassSchema` handles string subclasses
+        (type(None), False, "null"),
+    ]
 
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        return py_type in cls.primitive_types
+        return any(
+            py_type == type_  # Either a straight match
+            # Or we match on subclasses, if :attr:`primitive_types` allows us
+            or (include_subclasses and inspect.isclass(py_type) and issubclass(py_type, type_))
+            for type_, include_subclasses, _ in cls.primitive_types
+        )
 
     def data(self, names: NamesType) -> JSONStr:
         """Return the schema data"""
-        if Option.INT_32 in self.options and self.py_type == int:
+        if Option.INT_32 in self.options and issubclass(self.py_type, int):
             # If option is set to use 32 bit integers, return "int" schema instead of "double
             return "int"
-        elif Option.FLOAT_32 in self.options and self.py_type == float:
+        elif Option.FLOAT_32 in self.options and issubclass(self.py_type, float):
             # If option is set to use 32 bit floats, return "float" schema instead of "double"
             return "float"
         else:
-            return self.primitive_types[self.py_type]
+            # We're guaranteed a match since :meth:`handles_types` applies first
+            return next(data for type_, _, data in self.primitive_types if issubclass(self.py_type, type_))
 
 
 class StrSubclassSchema(Schema):
