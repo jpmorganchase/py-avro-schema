@@ -818,10 +818,10 @@ class PydanticSchema(RecordSchema):
     def _py_type(py_field: pydantic.fields.ModelField) -> Any:
         """Return a Python type annotation for a given Pydantic field"""
         if not py_field.allow_none:
-            return py_field.outer_type_
+            return py_field.annotation
         else:
-            # Pydantic strips out `Optional` and `Union[None, ...]` into `allow_none`.
-            return Optional[py_field.outer_type_]
+            # Pydantic allows setting fields to ``None`` even if there is no ``NoneType`` annotation...
+            return Optional[py_field.annotation]
 
 
 def _doc_for_class(py_type: Type) -> str:
