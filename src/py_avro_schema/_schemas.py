@@ -417,8 +417,8 @@ class DecimalSchema(Schema):
     :class:`decimal.Decimal` can be used for values) like so::
 
        >>> import decimal
-       >>> import avro_schema
-       >>> my_decimal: avro_schema.DecimalType[4, 2] = decimal.Decimal("12.34")
+       >>> import py_avro_schema
+       >>> my_decimal: py_avro_schema.DecimalType[4, 2] = decimal.Decimal("12.34")
     """
 
     @classmethod
