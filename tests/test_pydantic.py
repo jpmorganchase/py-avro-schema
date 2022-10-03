@@ -336,3 +336,20 @@ def test_uuid_field_default():
         ],
     }
     assert_schema(PyType, expected)
+
+
+def test_positive_float_field():
+    class PyType(pydantic.BaseModel):
+        field_a: pydantic.PositiveFloat
+
+    expected = {
+        "type": "record",
+        "name": "PyType",
+        "fields": [
+            {
+                "name": "field_a",
+                "type": "double",
+            }
+        ],
+    }
+    assert_schema(PyType, expected)

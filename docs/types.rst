@@ -209,14 +209,14 @@ Simple types
 ------------
 
 
-:class:`bool`
-~~~~~~~~~~~~~
+:class:`bool` (and subclasses)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Avro schema: ``boolean``
 
 
-:class:`bytes`
-~~~~~~~~~~~~~~
+:class:`bytes` (and subclasses)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Avro schema: ``bytes``
 
@@ -300,16 +300,16 @@ Outputs as:
 The default value is taken from the first defined enum symbol and is used to support writer/reader schema resolution.
 
 
-:class:`float`
-~~~~~~~~~~~~~~
+:class:`float` (and subclasses)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Avro schema: ``double``
 
 To output as the 32-bit Avro schema ``float`` instead, use :attr:`py_avro_schema.Option.FLOAT_32`.
 
 
-:class:`int`
-~~~~~~~~~~~~
+:class:`int` (and subclasses)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Avro schema: ``long``
 
