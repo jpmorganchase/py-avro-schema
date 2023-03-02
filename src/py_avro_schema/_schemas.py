@@ -441,6 +441,7 @@ class DecimalSchema(Schema):
         scale = self.py_type.__args__[1]
         precision = self.py_type.__args__[0]
         sign, digits, exp = py_default.as_tuple()
+        assert isinstance(exp, int)  # for mypy
         if len(digits) > precision:
             raise ValueError(
                 f"Default value {py_default} has precision {len(digits)} which is greater than the schema's precision "
@@ -449,7 +450,7 @@ class DecimalSchema(Schema):
         delta = exp + scale
         if delta < 0:
             raise ValueError(
-                f"Default value {py_default} has scale {abs(exp)} which is greater than the schema's scale {scale}"
+                f"Default value {py_default} has scale {-exp} which is greater than the schema's scale {scale}"
             )
 
         unscaled_datum = 0

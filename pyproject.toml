@@ -12,7 +12,82 @@
 
 # Project configuration file
 
+[project]
+
+name = "py-avro-schema"
+dynamic = ["version"]
+
+authors = [
+    { name = "J.P. Morgan Chase & Co.", email = "open_source@jpmorgan.com" }
+]
+description = "Generate Apache Avro schemas for Python types including standard library data-classes and Pydantic data models."
+readme = "README.md"
+license = { file = "LICENSE" }
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Typing :: Typed",
+]
+keywords = [
+    "avro",
+    "data",
+    "dataclasses",
+    "deserialization",
+    "generate",
+    "jpmorganchase",
+    "kafka",
+    "messaging",
+    "pydantic",
+    "python",
+    "schema",
+    "serialization",
+    "types",
+]
+
+# Minimum supported Python version
+requires-python = ">=3.7"
+# All runtime dependencies that must be packaged, pin major version only.
+dependencies = [
+    "avro~=1.10",
+    "importlib-metadata<4; python_version<'3.8'",
+    "orjson~=3.5",
+    "typeguard~=2.12",
+]
+
+
+[project.urls]
+
+"Homepage" = "https://github.com/jpmorganchase/py-avro-schema"
+"Bug Tracker" = "https://github.com/jpmorganchase/py-avro-schema/issues"
+"Documentation" = "https://py-avro-schema.readthedocs.io"
+"Download" = "https://pypi.python.org/pypi/py-avro-schema"
+"Source Code" = "https://github.com/jpmorganchase/py-avro-schema"
+
+
+[project.optional-dependencies]
+
+docs = [
+    "sphinx"
+]
+testing = [
+    "pydantic",
+    "pytest",
+    "pytest-cov",
+]
+linting = [
+    "black",
+    "flake8",
+    "interrogate",
+    "isort",
+    "mypy",
+    "pre-commit",
+]
+
+
 [build-system]
+
 requires = [
     "setuptools>=45",
     "wheel",
@@ -20,19 +95,29 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+
 [tool.setuptools_scm]
+# Section required to populate package version from Git tag
+
 
 [tool.interrogate]
+
 fail-under = 100
 verbose = 2
 color = true
 omit-covered-files = true
 
+
 [tool.coverage.report]
+
 fail_under = 90
 
+
 [tool.black]
+
 line-length = 120
 
+
 [tool.isort]
+
 profile = "black"
