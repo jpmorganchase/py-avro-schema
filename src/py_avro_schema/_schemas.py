@@ -449,7 +449,7 @@ class DecimalSchema(Schema):
         delta = exp + scale
         if delta < 0:
             raise ValueError(
-                f"Default value {py_default} has scale {abs(exp)} which is greater than the schema's scale {scale}"
+                f"Default value {py_default} has scale {-exp} which is greater than the schema's scale {scale}"
             )
 
         unscaled_datum = 0
