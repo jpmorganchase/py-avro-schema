@@ -1,6 +1,6 @@
 # py-avro-schema
 
-Generate Apache Avro schemas for Python types including standard library data-classes and Pydantic data models.
+Generate Apache Avro schemas for Python types including standard library [data-classes](https://docs.python.org/3/library/dataclasses.html) and [Pydantic data models](https://docs.pydantic.dev/usage/models/).
 
 :blue_book: Documentation: https://py-avro-schema.readthedocs.io/
 
@@ -26,6 +26,7 @@ The `py-avro-schema` package is installed in
 Run tests by simply calling `tox`.
 
 Install code quality Git hooks using `pre-commit install --install-hooks`.
+
 
 ## Terms & Conditions
 
