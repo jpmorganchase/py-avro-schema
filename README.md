@@ -21,7 +21,7 @@ tox -e dev
 ```
 
 The `py-avro-schema` package is installed in
-[editable mode](https://pip.pypa.io/en/stable/cli/pip_install/#editable-installs) inside the `.venv/` environment.
+[editable mode](https://pip.pypa.io/en/stable/cli/pip_install/#cmdoption-e) inside the `.venv/` environment.
 
 Run tests by simply calling `tox`.
 
