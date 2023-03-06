@@ -1,6 +1,6 @@
 # py-avro-schema
 
-Generate [Apache Avro](https://avro.apache.org) schemas for Python types including standard library [data-classes](https://docs.python.org/3/library/dataclasses.html) and [Pydantic data models](https://docs.pydantic.dev/usage/models).
+Generate [Apache Avro][] schemas for Python types including standard library [data-classes][] and [Pydantic data models][].
 
 :blue_book: Documentation: https://py-avro-schema.readthedocs.io
 
@@ -13,15 +13,14 @@ python -m pip install py-avro-schema
 
 ## Developing
 
-To setup a scratch/development virtual environment (under `.venv/`), first install [Tox](https://tox.wiki).
+To setup a scratch/development virtual environment (under `.venv/`), first install [Tox][].
 Then run:
 
 ```shell
 tox -e dev
 ```
 
-The `py-avro-schema` package is installed in
-[editable mode](https://pip.pypa.io/en/stable/cli/pip_install/#cmdoption-e) inside the `.venv/` environment.
+The `py-avro-schema` package is installed in [editable mode][] inside the `.venv/` environment.
 
 Run tests by simply calling `tox`.
 
@@ -42,4 +41,12 @@ specific language governing permissions and limitations under the License.
 
 ## Contributing
 
-See [CONTRIBUTING.md](https://github.com/jpmorganchase/.github/blob/main/CONTRIBUTING.md)
+See [CONTRIBUTING.md][]
+
+
+[Apache Avro]:          https://avro.apache.org
+[data-classes]:         https://docs.python.org/3/library/dataclasses.html
+[Pydantic data models]: https://docs.pydantic.dev/usage/models
+[Tox]:                  https://tox.wiki
+[editable mode]:        https://pip.pypa.io/en/stable/cli/pip_install/#cmdoption-e
+[CONTRIBUTING.md]:      https://github.com/jpmorganchase/.github/blob/main/CONTRIBUTING.md
