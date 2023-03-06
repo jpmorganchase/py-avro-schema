@@ -1,8 +1,8 @@
 # py-avro-schema
 
-Generate Apache Avro schemas for Python types including standard library [data-classes](https://docs.python.org/3/library/dataclasses.html) and [Pydantic data models](https://docs.pydantic.dev/usage/models/).
+Generate [Apache Avro](https://avro.apache.org) schemas for Python types including standard library [data-classes](https://docs.python.org/3/library/dataclasses.html) and [Pydantic data models](https://docs.pydantic.dev/usage/models).
 
-:blue_book: Documentation: https://py-avro-schema.readthedocs.io/
+:blue_book: Documentation: https://py-avro-schema.readthedocs.io
 
 
 ## Installing
@@ -13,7 +13,7 @@ python -m pip install py-avro-schema
 
 ## Developing
 
-To setup a scratch/development virtual environment (under `.venv/`), first install [Tox](https://pypi.org/project/tox/).
+To setup a scratch/development virtual environment (under `.venv/`), first install [Tox](https://tox.wiki).
 Then run:
 
 ```shell
