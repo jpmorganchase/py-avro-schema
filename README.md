@@ -2,7 +2,7 @@
 
 Generate Apache Avro schemas for Python types including standard library data-classes and Pydantic data models.
 
-Documentation: https://py-avro-schema.readthedocs.io/
+:blue_book: Documentation: https://py-avro-schema.readthedocs.io/
 
 
 ## Installing
