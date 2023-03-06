@@ -337,7 +337,11 @@ class TimeSchema(Schema):
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""
         logical_type = "time-millis" if Option.MILLISECONDS in self.options else "time-micros"
-        return {"type": "long", "logicalType": logical_type}
+        type_by_logical_type = {
+            "time-millis": "int",
+            "time-micros": "long",
+        }
+        return {"type": type_by_logical_type[logical_type], "logicalType": logical_type}
 
     def make_default(self, py_default: datetime.time) -> int:
         """Return an Avro schema compliant default value for a given Python value"""

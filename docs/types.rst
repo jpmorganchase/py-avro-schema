@@ -244,6 +244,7 @@ To output with millisecond precision instead (logical type ``timestamp-millis``)
 | Avro logical type: ``time-micros``
 
 To output with millisecond precision instead (logical type ``time-millis``), use :attr:`py_avro_schema.Option.MILLISECONDS`.
+In that case, the Avro schema is ``int``.
 
 
 :class:`datetime.timedelta`

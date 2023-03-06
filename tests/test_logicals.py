@@ -37,7 +37,7 @@ def test_time():
 def test_time_milliseconds():
     py_type = datetime.time
     expected = {
-        "type": "long",
+        "type": "int",
         "logicalType": "time-millis",
     }
     options = pas.Option.MILLISECONDS
