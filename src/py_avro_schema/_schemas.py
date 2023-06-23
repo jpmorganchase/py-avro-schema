@@ -848,7 +848,7 @@ class PlainClassSchema(RecordSchema):
         return (
             not dataclasses.is_dataclass(py_type)  # Dataclasses are handled above
             and not hasattr(py_type, "__fields__")  # Pydantic models too
-            and get_type_hints(py_type.__init__)  # Any other class with __init__ with typed args
+            and bool(get_type_hints(py_type.__init__))  # Any other class with __init__ with typed args
         )
 
     def __init__(self, py_type: Type, namespace: Optional[str] = None, options: Option = Option(0)):
