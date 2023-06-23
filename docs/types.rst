@@ -140,6 +140,48 @@ To *disable* this, pass the option :attr:`py_avro_schema.Option.NO_DOC`.
 Recursive or repeated reference to the same Pydantic class is supported. After the first time the schema is output, any subsequent references are by name only.
 
 
+Plain Python classes
+~~~~~~~~~~~~~~~~~~~~
+
+Supports Python classes with a :meth:`__init__` where all arguments have type hints and fully define all schema fields.
+
+Avro schema: ``record``
+
+The Avro ``record`` type is a named schema.
+**py-avro-schema** uses the Python class name as the schema name.
+
+Example::
+
+    class Port:
+        """A port you can sail too"""
+
+        def __init__(self, name: str, *, country: str = "NLD"):
+            self.name = name
+            self.country = country.upper()
+
+Is output as:
+
+.. code-block:: json
+
+   {
+     "type": "record",
+     "name": "Port",
+     "namespace": "shipping",
+       "doc":
+     "fields": [
+       {
+         "name": "name",
+         "type": "string"
+       },
+       {
+         "name": "country",
+         "type": "string",
+         "default": "NLD"
+       }
+     ]
+   }
+
+
 :class:`typing.Union`
 ~~~~~~~~~~~~~~~~~~~~~
 
