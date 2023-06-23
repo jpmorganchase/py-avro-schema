@@ -153,7 +153,7 @@ The Avro ``record`` type is a named schema.
 Example::
 
     class Port:
-        """A port you can sail too"""
+        """A port you can sail to"""
 
         def __init__(self, name: str, country: str = "NLD"):
             self.name = name
@@ -167,7 +167,7 @@ Is output as:
      "type": "record",
      "name": "Port",
      "namespace": "shipping",
-     "doc": "A port you can sail too",
+     "doc": "A port you can sail to",
      "fields": [
        {
          "name": "name",
