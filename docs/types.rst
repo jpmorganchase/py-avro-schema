@@ -155,7 +155,7 @@ Example::
     class Port:
         """A port you can sail too"""
 
-        def __init__(self, name: str, *, country: str = "NLD"):
+        def __init__(self, name: str, country: str = "NLD"):
             self.name = name
             self.country = country.upper()
 
@@ -167,7 +167,7 @@ Is output as:
      "type": "record",
      "name": "Port",
      "namespace": "shipping",
-       "doc":
+     "doc": "A port you can sail too",
      "fields": [
        {
          "name": "name",
