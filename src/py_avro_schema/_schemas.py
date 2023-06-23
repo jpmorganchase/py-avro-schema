@@ -25,7 +25,17 @@ import enum
 import inspect
 import sys
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, ForwardRef, List, Optional, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    ForwardRef,
+    List,
+    Optional,
+    Type,
+    Union,
+    get_type_hints,
+)
 
 import orjson
 import typeguard
@@ -827,6 +837,44 @@ class PydanticSchema(RecordSchema):
         else:
             # Pydantic allows setting fields to ``None`` even if there is no ``NoneType`` annotation...
             return Optional[py_field.annotation]
+
+
+class PlainClassSchema(RecordSchema):
+    """An Avro record schema for a plain Python class with typed constructor method arguments"""
+
+    @classmethod
+    def handles_type(cls, py_type: Type) -> bool:
+        """Whether this schema class can represent a given Python class"""
+        return (
+            not dataclasses.is_dataclass(py_type)  # Dataclasses are handled above
+            and not hasattr(py_type, "__fields__")  # Pydantic models too
+            and get_type_hints(py_type.__init__)  # Any other class with __init__ with typed args
+        )
+
+    def __init__(self, py_type: Type, namespace: Optional[str] = None, options: Option = Option(0)):
+        """
+        An Avro record schema for a plain Python class with typed constructor method arguments
+
+        :param py_type:   The Python class to generate a schema for.
+        :param namespace: The Avro namespace to add to schemas.
+        :param options:   Schema generation options.
+        """
+        super().__init__(py_type, namespace=namespace, options=options)
+        # Extracting arguments from __init__, dropping first argument `self`.
+        self.py_fields = list(inspect.signature(py_type.__init__).parameters.values())[1:]
+        self.record_fields = [self._record_field(field) for field in self.py_fields]
+
+    def _record_field(self, py_field: inspect.Parameter) -> RecordField:
+        """Return an Avro record field object for a given Python instance attribute"""
+        default = py_field.default if py_field.default != inspect.Parameter.empty else dataclasses.MISSING
+        field_obj = RecordField(
+            py_type=py_field.annotation,
+            name=py_field.name,
+            namespace=self.namespace_override,
+            default=default,
+            options=self.options,
+        )
+        return field_obj
 
 
 def _doc_for_class(py_type: Type) -> str:
