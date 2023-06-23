@@ -22,9 +22,9 @@ schema for.
 
 """
 
-import functools
 from typing import Optional, Type
 
+import memoization
 import orjson
 
 from py_avro_schema._schemas import JSON_OPTIONS, Option, schema
@@ -47,7 +47,7 @@ __all__ = [
 ]
 
 
-@functools.lru_cache(maxsize=None)
+@memoization.cached
 def generate(
     py_type: Type,
     *,
