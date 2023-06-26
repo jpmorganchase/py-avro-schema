@@ -254,7 +254,13 @@ class StrSubclassSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type[str]) -> bool:
         """Whether this schema class can represent a given Python class"""
-        return inspect.isclass(py_type) and issubclass(py_type, str) and py_type is not str
+        return (
+            inspect.isclass(py_type)
+            and issubclass(py_type, str)
+            and py_type is not str
+            # Enums are always modelled as enum schemas, even when subclassing str
+            and not issubclass(py_type, enum.Enum)
+        )
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""
@@ -846,9 +852,14 @@ class PlainClassSchema(RecordSchema):
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
         return (
-            not dataclasses.is_dataclass(py_type)  # Dataclasses are handled above
-            and not hasattr(py_type, "__fields__")  # Pydantic models too
-            and bool(get_type_hints(py_type.__init__))  # Any other class with __init__ with typed args
+            # Dataclasses are handled above
+            not dataclasses.is_dataclass(py_type)
+            # Pydantic models are handled above
+            and not hasattr(py_type, "__fields__")
+            # If we are subclassing a string, used the "named string" approach
+            and (inspect.isclass(py_type) and not issubclass(py_type, str))
+            # Any other class with __init__ with typed args
+            and bool(get_type_hints(py_type.__init__))
         )
 
     def __init__(self, py_type: Type, namespace: Optional[str] = None, options: Option = Option(0)):

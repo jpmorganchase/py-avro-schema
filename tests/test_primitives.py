@@ -57,6 +57,19 @@ def test_str_subclass_namespaced():
     assert_schema(PyType, expected, namespace="my_package.my_module")
 
 
+def test_str_subclass_other_classes():
+    import packaging.version
+
+    class PyType(packaging.version.Version, str):
+        ...
+
+    expected = {
+        "type": "string",
+        "namedString": "PyType",
+    }
+    assert_schema(PyType, expected)
+
+
 def test_int():
     py_type = int
     expected = "long"
@@ -222,6 +235,23 @@ def test_optional_str():
 
 def test_enum():
     class PyType(enum.Enum):
+        RED = "RED"
+        GREEN = "GREEN"
+
+    expected = {
+        "type": "enum",
+        "name": "PyType",
+        "symbols": [
+            "RED",
+            "GREEN",
+        ],
+        "default": "RED",
+    }
+    assert_schema(PyType, expected)
+
+
+def test_enum_str_subclass():
+    class PyType(str, enum.Enum):
         RED = "RED"
         GREEN = "GREEN"
 

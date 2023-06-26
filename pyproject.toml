@@ -73,6 +73,7 @@ docs = [
     "sphinx"
 ]
 testing = [
+    "packaging",  # A test case uses packaging.version.Version
     "pydantic",
     "pytest",
     "pytest-cov",
