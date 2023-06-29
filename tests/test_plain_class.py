@@ -13,6 +13,7 @@ import re
 
 import pytest
 
+import py_avro_schema
 from py_avro_schema._testing import assert_schema
 
 
@@ -66,7 +67,7 @@ def test_plain_class_no_type_hints():
             self.longitude = longitude
 
     with pytest.raises(
-        TypeError,
+        py_avro_schema.TypeNotSupportedError,
         match=re.escape(
             "Cannot generate Avro schema for Python type <class 'test_plain_class.test_plain_class_no_type_hints."
             "<locals>.PyType'>"
