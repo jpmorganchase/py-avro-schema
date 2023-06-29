@@ -52,6 +52,10 @@ JSONType = Union[JSONStr, JSONObj, JSONArray]
 NamesType = List[str]
 
 
+class TypeNotSupportedError(TypeError):
+    """Error raised when a Avro schema cannot be generated for a given Python type"""
+
+
 class Option(enum.Flag):
     """
     Schema generation options
@@ -143,7 +147,7 @@ def _schema_obj(py_type: Type, namespace: Optional[str] = None, options: Option 
         schema_obj = schema_class(py_type, namespace=namespace, options=options)  # type: ignore
         if schema_obj:
             return schema_obj
-    raise TypeError(f"Cannot generate Avro schema for Python type {py_type}")
+    raise TypeNotSupportedError(f"Cannot generate Avro schema for Python type {py_type}")
 
 
 class Schema(abc.ABC):
