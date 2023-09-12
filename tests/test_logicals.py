@@ -11,6 +11,7 @@
 
 import datetime
 import uuid
+from typing import Any, Dict, List
 
 import py_avro_schema as pas
 from py_avro_schema._testing import assert_schema
@@ -110,5 +111,43 @@ def test_uuid():
     expected = {
         "type": "string",
         "logicalType": "uuid",
+    }
+    assert_schema(py_type, expected)
+
+
+def test_dict_json_logical_string_field():
+    py_type = Dict[str, Any]
+    expected = {
+        "type": "string",
+        "logicalType": "json",
+    }
+    options = pas.Option.LOGICAL_JSON_STRING
+    assert_schema(py_type, expected, options=options)
+
+
+def test_dict_json_logical_bytes_field():
+    py_type = Dict[str, Any]
+    expected = {
+        "type": "bytes",
+        "logicalType": "json",
+    }
+    assert_schema(py_type, expected)
+
+
+def test_list_json_logical_string_field():
+    py_type = List[Dict[str, Any]]
+    expected = {
+        "type": "string",
+        "logicalType": "json",
+    }
+    options = pas.Option.LOGICAL_JSON_STRING
+    assert_schema(py_type, expected, options=options)
+
+
+def test_list_json_logical_bytes_field():
+    py_type = List[Dict[str, Any]]
+    expected = {
+        "type": "bytes",
+        "logicalType": "json",
     }
     assert_schema(py_type, expected)
