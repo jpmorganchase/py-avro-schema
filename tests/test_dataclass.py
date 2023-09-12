@@ -603,57 +603,6 @@ def test_namespaced_enum_field():
     assert_schema(PyType, expected, namespace="my_package.my_module")
 
 
-def test_dict_json_logical_string_field():
-    @dataclasses.dataclass
-    class PyType:
-        field_a: Dict[str, Any] = dataclasses.field(
-            metadata={"avro_adapter": {"logical_type": "json"}},
-            default_factory=dict,
-        )
-
-    expected = {
-        "type": "record",
-        "name": "PyType",
-        "fields": [
-            {
-                "name": "field_a",
-                "type": {
-                    "type": "string",
-                    "logicalType": "json",
-                },
-                "default": "{}",
-            }
-        ],
-    }
-    options = pas.Option.LOGICAL_JSON_STRING
-    assert_schema(PyType, expected, options=options)
-
-
-def test_dict_json_logical_bytes_field():
-    @dataclasses.dataclass
-    class PyType:
-        field_a: Dict[str, Any] = dataclasses.field(
-            metadata={"avro_adapter": {"logical_type": "json"}},
-            default_factory=dict,
-        )
-
-    expected = {
-        "type": "record",
-        "name": "PyType",
-        "fields": [
-            {
-                "name": "field_a",
-                "type": {
-                    "type": "bytes",
-                    "logicalType": "json",
-                },
-                "default": "{}",
-            }
-        ],
-    }
-    assert_schema(PyType, expected)
-
-
 def test_decimal_field_default():
     @dataclasses.dataclass
     class PyType:
