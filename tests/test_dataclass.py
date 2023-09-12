@@ -14,7 +14,7 @@ import datetime
 import decimal
 import enum
 import re
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 import pytest
 
