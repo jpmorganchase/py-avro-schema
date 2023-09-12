@@ -84,6 +84,7 @@ Recursive or repeated reference to the same Python dataclass is supported. After
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Supports Python classes inheriting from `pydantic.BaseModel <https://pydantic-docs.helpmanual.io/usage/models/>`_.
+Supports Pydantic version 1.x only at the moment.
 
 .. (No intersphinx for Pydantic, unfortunately.)
 
