@@ -278,13 +278,12 @@ class StrSubclassSchema(Schema):
 
 
 class DictAsJSONSchema(Schema):
-    """An Avro string schema representing a Python Dict[str, Any] assuming JSON serialization"""
+    """An Avro string schema representing a Python Dict[str, Any] or List[Dict[str, Any]] assuming JSON serialization"""
 
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        origin = getattr(py_type, "__origin__", None)
-        return inspect.isclass(origin) and issubclass(origin, dict) and py_type.__args__ == (str, Any)
+        return _is_dict_str_any(py_type) or _is_list_dict_str_any(py_type)
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""
@@ -901,3 +900,19 @@ def _doc_for_class(py_type: Type) -> str:
         return doc
     else:
         return ""
+
+
+def _is_dict_str_any(py_type: Type) -> bool:
+    """Return whether a given type is ``Dict[str, Any]``"""
+    origin = getattr(py_type, "__origin__", None)
+    return inspect.isclass(origin) and issubclass(origin, dict) and py_type.__args__ == (str, Any)
+
+
+def _is_list_dict_str_any(py_type: Type) -> bool:
+    """Return whether a given type is ``List[Dict[str, Any]]``"""
+    origin = getattr(py_type, "__origin__", None)
+    args = getattr(py_type, "__args__", None)
+    if args:
+        return inspect.isclass(origin) and issubclass(origin, list) and _is_dict_str_any(args[0])
+    else:
+        return False
