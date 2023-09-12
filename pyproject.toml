@@ -74,7 +74,7 @@ docs = [
 ]
 testing = [
     "packaging",  # A test case uses packaging.version.Version
-    "pydantic",
+    "pydantic~=1.0",  # TODO: support Pydantic 2
     "pytest",
     "pytest-cov",
 ]
