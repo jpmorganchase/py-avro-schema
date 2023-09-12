@@ -214,6 +214,23 @@ Arbitrary Python dictionaries could be serialized as a ``bytes`` Avro schema by 
 To support JSON serialization as *strings* instead of *bytes*, use :attr:`py_avro_schema.Option.LOGICAL_JSON_STRING`.
 
 
+:class:`typing.List[typing.Dict[str, typing.Any]]`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. seealso::
+
+   For a "normal" Avro ``array`` schema using fully typed Python lists of dictionaries, see :ref:`types::class:`typing.sequence``.
+
+
+| Avro schema: ``bytes``
+| Avro logical type: ``json``
+
+Arbitrary lists of Python dictionaries could be serialized as a ``bytes`` Avro schema by first serializing the data as JSON.
+**py-avro-schema** supports this "JSON-in-Avro" approach by adding the **custom** logical type ``json`` to a ``bytes`` schema.
+
+To support JSON serialization as *strings* instead of *bytes*, use :attr:`py_avro_schema.Option.LOGICAL_JSON_STRING`.
+
+
 :class:`typing.Mapping`
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -221,7 +238,8 @@ Avro schema: ``map``
 
 This supports other "generic type" versions of :class:`collections.abc.Mapping`, including :class:`typing.Dict`.
 
-Avro ``map`` schemas support **string** keys only. Map values can be any other Python type supported by **py-avro-schema**. For example, ``Dict[str, int]`` is output as:
+Avro ``map`` schemas support **string** keys only. Map values can be any other Python type supported by **py-avro-schema**.
+For example, ``Dict[str, int]`` is output as:
 
 .. code-block:: json
 
