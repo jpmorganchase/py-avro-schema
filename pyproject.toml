@@ -84,6 +84,7 @@ linting = [
     "isort",
     "mypy",
     "pre-commit",
+    "pydantic>=2",  # For mypy
 ]
 
 
