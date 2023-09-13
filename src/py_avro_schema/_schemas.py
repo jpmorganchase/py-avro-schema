@@ -45,7 +45,8 @@ import typeguard
 
 if TYPE_CHECKING:
     # Pydantic not necessarily required at runtime
-    import pydantic  # type: ignore
+    import pydantic
+    import pydantic.fields
 
 JSONStr = str
 JSONObj = Dict[str, Any]
@@ -699,7 +700,6 @@ class RecordSchema(NamedSchema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
-        self.py_fields: collections.abc.Sequence[Any] = []
         self.record_fields: collections.abc.Sequence[RecordField] = []
 
     def data_before_deduplication(self, names: NamesType) -> JSONObj:
@@ -829,7 +829,7 @@ class PydanticSchema(RecordSchema):
         self.raw_annotations = py_type.__annotations__
         self.record_fields = [self._record_field(name, field) for name, field in self.py_fields.items()]
 
-    def _record_field(self, name: str, py_field: pydantic.fields.ModelField) -> RecordField:
+    def _record_field(self, name: str, py_field: pydantic.fields.FieldInfo) -> RecordField:
         """Return an Avro record field object for a given Pydantic model field"""
         default = dataclasses.MISSING if py_field.is_required() else py_field.get_default(call_default_factory=True)
         # Pydantic 2 resolves forward references for us. To avoid infinite recursion, we check if the unresolved raw
@@ -844,7 +844,7 @@ class PydanticSchema(RecordSchema):
             name=name,
             namespace=self.namespace_override,
             default=default,
-            docs=py_field.description,
+            docs=py_field.description or "",
             options=self.options,
         )
         return field_obj
@@ -922,4 +922,8 @@ def _is_list_dict_str_any(py_type: Type) -> bool:
 
 def _is_annotated_uuid(py_type: Type) -> bool:
     """Return whether a given type is ``Annotated[uuid.UUID, ...]``"""
-    return get_origin(py_type) == Annotated and get_args(py_type) and issubclass(get_args(py_type)[0], uuid.UUID)
+    args = get_args(py_type)
+    if args:
+        return get_origin(py_type) == Annotated and issubclass(get_args(py_type)[0], uuid.UUID)
+    else:
+        return False
