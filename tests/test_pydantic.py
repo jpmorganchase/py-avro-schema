@@ -83,27 +83,6 @@ def test_optional_field_default():
     assert_schema(PyType, expected)
 
 
-def test_optional_field_default_2():
-    class PyType(pydantic.BaseModel):
-        field_a: str = None  # In Pydantic you can do this :(
-
-    expected = {
-        "type": "record",
-        "name": "PyType",
-        "fields": [
-            {
-                "name": "field_a",
-                "type": [
-                    "null",
-                    "string",
-                ],
-                "default": None,
-            }
-        ],
-    }
-    assert_schema(PyType, expected)
-
-
 def test_list_string_field():
     class PyType(pydantic.BaseModel):
         field_a: List[str]
@@ -317,9 +296,7 @@ def test_uuid():
 
 def test_uuid_field_default():
     class PyType(pydantic.BaseModel):
-        # Using :mod:`uuid` as the library to generate the ID, then cast to :class:`pydantic.UUID4` to match the type
-        # hint. Alternatively, just use plain :class:`uuid.UUID` as the type hint.
-        field_a: pydantic.UUID4 = pydantic.Field(default_factory=lambda: pydantic.UUID4(uuid.uuid4().hex))
+        field_a: pydantic.UUID4 = pydantic.Field(default_factory=uuid.uuid4)
 
     expected = {
         "type": "record",

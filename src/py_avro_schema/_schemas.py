@@ -27,6 +27,7 @@ import sys
 import uuid
 from typing import (
     TYPE_CHECKING,
+    Annotated,
     Any,
     Dict,
     ForwardRef,
@@ -34,6 +35,8 @@ from typing import (
     Optional,
     Type,
     Union,
+    get_args,
+    get_origin,
     get_type_hints,
 )
 
@@ -42,7 +45,8 @@ import typeguard
 
 if TYPE_CHECKING:
     # Pydantic not necessarily required at runtime
-    import pydantic  # type: ignore
+    import pydantic
+    import pydantic.fields
 
 JSONStr = str
 JSONObj = Dict[str, Any]
@@ -304,7 +308,7 @@ class UUIDSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        return inspect.isclass(py_type) and issubclass(py_type, uuid.UUID)
+        return (inspect.isclass(py_type) and issubclass(py_type, uuid.UUID)) or _is_annotated_uuid(py_type)
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""
@@ -447,7 +451,7 @@ class DecimalSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        origin = getattr(py_type, "__origin__", None)
+        origin = get_origin(py_type)
         return origin is decimal.Decimal
 
     def data(self, names: NamesType) -> JSONObj:
@@ -495,7 +499,7 @@ class SequenceSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        origin = getattr(py_type, "__origin__", None)
+        origin = get_origin(py_type)
         return inspect.isclass(origin) and issubclass(origin, collections.abc.Sequence)
 
     def __init__(
@@ -528,7 +532,7 @@ class DictSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        origin = getattr(py_type, "__origin__", None)
+        origin = get_origin(py_type)
         return inspect.isclass(origin) and issubclass(origin, collections.abc.Mapping) and py_type.__args__[1] != Any
 
     def __init__(
@@ -563,7 +567,7 @@ class UnionSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        origin = getattr(py_type, "__origin__", None)
+        origin = get_origin(py_type)
         return origin == Union
 
     def __init__(self, py_type: Type[Union[Any]], namespace: Optional[str] = None, options: Option = Option(0)):
@@ -696,7 +700,6 @@ class RecordSchema(NamedSchema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
-        self.py_fields: collections.abc.Sequence[Any] = []
         self.record_fields: collections.abc.Sequence[RecordField] = []
 
     def data_before_deduplication(self, names: NamesType) -> JSONObj:
@@ -822,30 +825,29 @@ class PydanticSchema(RecordSchema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
-        self.py_fields = list(py_type.__fields__.values())
-        self.record_fields = [self._record_field(field) for field in self.py_fields]
+        self.py_fields = py_type.model_fields
+        self.raw_annotations = py_type.__annotations__
+        self.record_fields = [self._record_field(name, field) for name, field in self.py_fields.items()]
 
-    def _record_field(self, py_field: pydantic.fields.ModelField) -> RecordField:
+    def _record_field(self, name: str, py_field: pydantic.fields.FieldInfo) -> RecordField:
         """Return an Avro record field object for a given Pydantic model field"""
-        default = dataclasses.MISSING if py_field.required else py_field.get_default()
+        default = dataclasses.MISSING if py_field.is_required() else py_field.get_default(call_default_factory=True)
+        # Pydantic 2 resolves forward references for us. To avoid infinite recursion, we check if the unresolved raw
+        # annoation is a forward reference. If so, we use that instead of Pydantic's resolved type hint. There might be
+        # a better way to un-resolve the forward reference...
+        if isinstance(self.raw_annotations[name], (str, ForwardRef)):
+            py_type = self.raw_annotations[name]
+        else:
+            py_type = py_field.annotation
         field_obj = RecordField(
-            py_type=self._py_type(py_field),
-            name=py_field.name,
+            py_type=py_type,
+            name=name,
             namespace=self.namespace_override,
             default=default,
-            docs=py_field.field_info.description,
+            docs=py_field.description or "",
             options=self.options,
         )
         return field_obj
-
-    @staticmethod
-    def _py_type(py_field: pydantic.fields.ModelField) -> Any:
-        """Return a Python type annotation for a given Pydantic field"""
-        if not py_field.allow_none:
-            return py_field.annotation
-        else:
-            # Pydantic allows setting fields to ``None`` even if there is no ``NoneType`` annotation...
-            return Optional[py_field.annotation]
 
 
 class PlainClassSchema(RecordSchema):
@@ -904,15 +906,24 @@ def _doc_for_class(py_type: Type) -> str:
 
 def _is_dict_str_any(py_type: Type) -> bool:
     """Return whether a given type is ``Dict[str, Any]``"""
-    origin = getattr(py_type, "__origin__", None)
-    return inspect.isclass(origin) and issubclass(origin, dict) and py_type.__args__ == (str, Any)
+    origin = get_origin(py_type)
+    return inspect.isclass(origin) and issubclass(origin, dict) and get_args(py_type) == (str, Any)
 
 
 def _is_list_dict_str_any(py_type: Type) -> bool:
     """Return whether a given type is ``List[Dict[str, Any]]``"""
-    origin = getattr(py_type, "__origin__", None)
-    args = getattr(py_type, "__args__", None)
+    origin = get_origin(py_type)
+    args = get_args(py_type)
     if args:
         return inspect.isclass(origin) and issubclass(origin, list) and _is_dict_str_any(args[0])
+    else:
+        return False
+
+
+def _is_annotated_uuid(py_type: Type) -> bool:
+    """Return whether a given type is ``Annotated[uuid.UUID, ...]``"""
+    args = get_args(py_type)
+    if args:
+        return get_origin(py_type) == Annotated and issubclass(get_args(py_type)[0], uuid.UUID)
     else:
         return False

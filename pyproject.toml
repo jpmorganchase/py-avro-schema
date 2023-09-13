@@ -47,11 +47,10 @@ keywords = [
 ]
 
 # Minimum supported Python version
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 # All runtime dependencies that must be packaged, pin major version only.
 dependencies = [
     "avro~=1.10",
-    "importlib-metadata<4; python_version<'3.8'",
     "memoization~=0.4",
     "orjson~=3.5",
     "typeguard~=2.12",
@@ -74,7 +73,7 @@ docs = [
 ]
 testing = [
     "packaging",  # A test case uses packaging.version.Version
-    "pydantic~=1.0",  # TODO: support Pydantic 2
+    "pydantic>=2",
     "pytest",
     "pytest-cov",
 ]
@@ -85,6 +84,7 @@ linting = [
     "isort",
     "mypy",
     "pre-commit",
+    "pydantic>=2",  # For mypy
 ]
 
 
