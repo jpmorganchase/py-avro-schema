@@ -450,7 +450,7 @@ class DecimalSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        origin = getattr(py_type, "__origin__", None)
+        origin = get_origin(py_type)
         return origin is decimal.Decimal
 
     def data(self, names: NamesType) -> JSONObj:
@@ -498,7 +498,7 @@ class SequenceSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        origin = getattr(py_type, "__origin__", None)
+        origin = get_origin(py_type)
         return inspect.isclass(origin) and issubclass(origin, collections.abc.Sequence)
 
     def __init__(
@@ -531,7 +531,7 @@ class DictSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        origin = getattr(py_type, "__origin__", None)
+        origin = get_origin(py_type)
         return inspect.isclass(origin) and issubclass(origin, collections.abc.Mapping) and py_type.__args__[1] != Any
 
     def __init__(
@@ -566,7 +566,7 @@ class UnionSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        origin = getattr(py_type, "__origin__", None)
+        origin = get_origin(py_type)
         return origin == Union
 
     def __init__(self, py_type: Type[Union[Any]], namespace: Optional[str] = None, options: Option = Option(0)):
@@ -906,14 +906,14 @@ def _doc_for_class(py_type: Type) -> str:
 
 def _is_dict_str_any(py_type: Type) -> bool:
     """Return whether a given type is ``Dict[str, Any]``"""
-    origin = getattr(py_type, "__origin__", None)
-    return inspect.isclass(origin) and issubclass(origin, dict) and py_type.__args__ == (str, Any)
+    origin = get_origin(py_type)
+    return inspect.isclass(origin) and issubclass(origin, dict) and get_args(py_type) == (str, Any)
 
 
 def _is_list_dict_str_any(py_type: Type) -> bool:
     """Return whether a given type is ``List[Dict[str, Any]]``"""
-    origin = getattr(py_type, "__origin__", None)
-    args = getattr(py_type, "__args__", None)
+    origin = get_origin(py_type)
+    args = get_args(py_type)
     if args:
         return inspect.isclass(origin) and issubclass(origin, list) and _is_dict_str_any(args[0])
     else:
