@@ -69,7 +69,8 @@ dependencies = [
 [project.optional-dependencies]
 
 docs = [
-    "sphinx"
+    "sphinx",
+    "sphinx-rtd-theme",
 ]
 testing = [
     "packaging",  # A test case uses packaging.version.Version
