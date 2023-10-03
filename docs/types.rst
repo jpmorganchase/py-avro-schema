@@ -140,6 +140,9 @@ To *disable* this, pass the option :attr:`py_avro_schema.Option.NO_DOC`.
 
 Recursive or repeated reference to the same Pydantic class is supported. After the first time the schema is output, any subsequent references are by name only.
 
+.. warning::
+   When using a hierarchy of Pydantic model classes, recursive type references are supported in the *final class only* and not in any inherited/base class.
+
 
 Plain Python classes
 ~~~~~~~~~~~~~~~~~~~~
@@ -191,6 +194,39 @@ Avro schema: JSON array of multiple Avro schemas
 Union members can be any other type supported by **py-avro-schema**.
 
 When defined as a class field with a **default** value, the union members may be re-ordered to ensure that the first member matches the type of the default value.
+
+
+Forward references
+~~~~~~~~~~~~~~~~~~
+
+Avro schema: any named schema
+
+**py-avro-schema** generally supports "forward" or recursive references, for example when a class attribute has the same
+type as a the class itself.
+
+Example::
+
+    @dataclasses.dataclass
+    class PyType:
+        field_a: "PyType"
+
+Is output as:
+
+.. code-block:: json
+
+   {
+     "type": "record",
+     "name": "PyType",
+     "fields": [
+       {
+         "name": "field_a",
+         "type": "PyType",
+       },
+     ],
+   }
+
+.. warning::
+   When using a hierarchy of **Pydantic** model classes, recursive type references are supported in the *final class only* and not in any inherited/base class.
 
 
 Collections
