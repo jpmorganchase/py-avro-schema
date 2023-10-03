@@ -330,3 +330,21 @@ def test_positive_float_field():
         ],
     }
     assert_schema(PyType, expected)
+
+
+def test_model_inheritance():
+    class PyTypeCustomBase(pydantic.BaseModel):
+        field_a: str
+
+    class PyType(PyTypeCustomBase):
+        field_b: str
+
+    expected = {
+        "type": "record",
+        "name": "PyType",
+        "fields": [
+            {"name": "field_a", "type": "string"},
+            {"name": "field_b", "type": "string"},
+        ],
+    }
+    assert_schema(PyType, expected)
