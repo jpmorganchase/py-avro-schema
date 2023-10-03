@@ -9,12 +9,12 @@
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import re
 import uuid
 from typing import List, Optional
 
 import pydantic
 import pytest
+import typeguard
 
 from py_avro_schema._testing import assert_schema
 
@@ -58,7 +58,7 @@ def test_string_field_default_wrong_type():
     class PyType(pydantic.BaseModel):
         field_a: str = 1  # That's not valid, because field type is str
 
-    with pytest.raises(TypeError, match="type of field field_a must be str; got int instead"):
+    with pytest.raises(typeguard.TypeCheckError, match="int is not an instance of str"):
         assert_schema(PyType, {})
 
 
@@ -128,7 +128,7 @@ def test_list_string_field_default_wrong_type():
     class PyType(pydantic.BaseModel):
         field_a: List[str] = [1]  # Pydantic allows mutable defaults like this
 
-    with pytest.raises(TypeError, match=re.escape("type of field field_a[0] must be str; got int instead")):
+    with pytest.raises(typeguard.TypeCheckError, match="item 0 of list is not an instance of str"):
         assert_schema(PyType, {})
 
 

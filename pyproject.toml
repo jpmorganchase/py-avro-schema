@@ -53,7 +53,7 @@ dependencies = [
     "avro~=1.10",
     "memoization~=0.4",
     "orjson~=3.5",
-    "typeguard~=2.12",
+    "typeguard~=4.0",
 ]
 
 
