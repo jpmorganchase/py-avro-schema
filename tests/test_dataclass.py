@@ -17,6 +17,7 @@ import re
 from typing import Dict, List, Optional
 
 import pytest
+import typeguard
 
 import py_avro_schema as pas
 from py_avro_schema._testing import assert_schema
@@ -94,7 +95,7 @@ def test_string_field_default_wrong_type():
     class PyType:
         field_a: str = None  # That's not valid, because field type is str
 
-    with pytest.raises(TypeError, match="type of field field_a must be str; got NoneType instead"):
+    with pytest.raises(typeguard.TypeCheckError, match="None is not an instance of str"):
         assert_schema(PyType, {})
 
 
@@ -168,7 +169,7 @@ def test_list_string_field_default_wrong_type():
     class PyType:
         field_a: List[str] = dataclasses.field(default_factory=lambda: [1])
 
-    with pytest.raises(TypeError, match=re.escape("type of field field_a[0] must be str; got int instead")):
+    with pytest.raises(typeguard.TypeCheckError, match="item 0 of list is not an instance of str"):
         assert_schema(PyType, {})
 
 
