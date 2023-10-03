@@ -835,7 +835,9 @@ class PydanticSchema(RecordSchema):
         # Pydantic 2 resolves forward references for us. To avoid infinite recursion, we check if the unresolved raw
         # annoation is a forward reference. If so, we use that instead of Pydantic's resolved type hint. There might be
         # a better way to un-resolve the forward reference...
-        if isinstance(self.raw_annotations[name], (str, ForwardRef)):
+        # This does not support forward references from base model classes. If required we might need to traverse class
+        # hierarchy to get the raw annotations?
+        if isinstance(self.raw_annotations.get(name), (str, ForwardRef)):
             py_type = self.raw_annotations[name]
         else:
             py_type = py_field.annotation
