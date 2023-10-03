@@ -343,8 +343,39 @@ def test_model_inheritance():
         "type": "record",
         "name": "PyType",
         "fields": [
-            {"name": "field_a", "type": "string"},
-            {"name": "field_b", "type": "string"},
+            {
+                "name": "field_a",
+                "type": "string",
+            },
+            {
+                "name": "field_b",
+                "type": "string",
+            },
+        ],
+    }
+    assert_schema(PyType, expected)
+
+
+@pytest.mark.xfail(reason="Forward references in base classes not supported yet")
+def test_model_inheritance_self_ref_in_base():
+    class PyTypeCustomBase(pydantic.BaseModel):
+        field_a: "PyTypeCustomBase"
+
+    class PyType(PyTypeCustomBase):
+        field_b: str
+
+    expected = {
+        "type": "record",
+        "name": "PyType",
+        "fields": [
+            {
+                "name": "field_a",
+                "type": "PyTypeCustomBase",
+            },
+            {
+                "name": "field_b",
+                "type": "string",
+            },
         ],
     }
     assert_schema(PyType, expected)
