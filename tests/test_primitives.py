@@ -120,8 +120,20 @@ def test_string_list():
     assert_schema(py_type, expected)
 
 
+def test_string_list_lower_list():
+    py_type = list[str]
+    expected = {"type": "array", "items": "string"}
+    assert_schema(py_type, expected)
+
+
 def test_int_list():
     py_type = List[int]
+    expected = {"type": "array", "items": "long"}
+    assert_schema(py_type, expected)
+
+
+def test_int_list_lower_list():
+    py_type = list[int]
     expected = {"type": "array", "items": "long"}
     assert_schema(py_type, expected)
 
@@ -156,8 +168,32 @@ def test_string_list_of_lists():
     assert_schema(py_type, expected)
 
 
+def test_string_list_of_lists_lower_list():
+    py_type = list[list[str]]
+    expected = {
+        "type": "array",
+        "items": {
+            "type": "array",
+            "items": "string",
+        },
+    }
+    assert_schema(py_type, expected)
+
+
 def test_string_list_of_dicts():
     py_type = List[Dict[str, str]]
+    expected = {
+        "type": "array",
+        "items": {
+            "type": "map",
+            "values": "string",
+        },
+    }
+    assert_schema(py_type, expected)
+
+
+def test_string_list_of_dicts_lower_list():
+    py_type = list[Dict[str, str]]
     expected = {
         "type": "array",
         "items": {
