@@ -16,6 +16,7 @@ import pydantic
 import pytest
 import typeguard
 
+from py_avro_schema import Option
 from py_avro_schema._testing import assert_schema
 
 
@@ -379,3 +380,20 @@ def test_model_inheritance_self_ref_in_base():
         ],
     }
     assert_schema(PyType, expected)
+
+
+def test_field_by_alias():
+    class PyType(pydantic.BaseModel):
+        field_a: str = pydantic.Field(..., alias="fieldA")
+
+    expected = {
+        "type": "record",
+        "name": "PyType",
+        "fields": [
+            {
+                "name": "fieldA",
+                "type": "string",
+            }
+        ],
+    }
+    assert_schema(PyType, expected, options=Option.PYDANTIC_BY_ALIAS)

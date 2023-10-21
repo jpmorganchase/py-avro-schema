@@ -104,6 +104,9 @@ class Option(enum.Flag):
     #: Do not populate ``doc`` schema attributes based on Python docstrings
     NO_DOC = enum.auto()
 
+    #: Use the alias specified in a Pydantic model's ``Field`` instead of the field's name
+    PYDANTIC_BY_ALIAS = enum.auto()
+
 
 JSON_OPTIONS = [opt for opt in Option if opt.name and opt.name.startswith("JSON_")]
 
@@ -841,9 +844,11 @@ class PydanticSchema(RecordSchema):
             py_type = self.raw_annotations[name]
         else:
             py_type = py_field.annotation
+
+        record_name = py_field.alias if Option.PYDANTIC_BY_ALIAS in self.options and py_field.alias else name
         field_obj = RecordField(
             py_type=py_type,
-            name=name,
+            name=record_name,
             namespace=self.namespace_override,
             default=default,
             docs=py_field.description or "",
