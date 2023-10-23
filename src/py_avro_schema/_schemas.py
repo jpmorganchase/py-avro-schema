@@ -105,7 +105,7 @@ class Option(enum.Flag):
     NO_DOC = enum.auto()
 
     #: Use the alias specified in a classes ``Field`` instead of the field's name.
-    # This currently only affects Pydantic Models
+    #: This currently only affects Pydantic Models
     USE_FIELD_ALIAS = enum.auto()
 
 
