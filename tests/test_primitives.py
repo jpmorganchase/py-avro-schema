@@ -137,6 +137,10 @@ def test_string_tuple():
     expected = {"type": "array", "items": "string"}
     assert_schema(py_type, expected)
 
+    py_type = tuple[str]
+    expected = {"type": "array", "items": "string"}
+    assert_schema(py_type, expected)
+
 
 def test_string_sequence():
     py_type = Sequence[str]
@@ -220,15 +224,33 @@ def test_string_dict_of_dicts():
     }
     assert_schema(py_type, expected)
 
+    py_type = dict[str, dict[str, str]]
+    expected = {
+        "type": "map",
+        "values": {
+            "type": "map",
+            "values": "string",
+        },
+    }
+    assert_schema(py_type, expected)
+
 
 def test_union_string_int():
     py_type = Union[str, int]
     expected = ["string", "long"]
     assert_schema(py_type, expected)
 
+    py_type = str | int
+    expected = ["string", "long"]
+    assert_schema(py_type, expected)
+
 
 def test_union_string_string_int():
     py_type = Union[str, str, int]
+    expected = ["string", "long"]
+    assert_schema(py_type, expected)
+
+    py_type = str | int | str
     expected = ["string", "long"]
     assert_schema(py_type, expected)
 
@@ -241,6 +263,10 @@ def test_union_of_union_string_int():
 
 def test_optional_str():
     py_type = Optional[str]
+    expected = ["string", "null"]
+    assert_schema(py_type, expected)
+
+    py_type = str | None
     expected = ["string", "null"]
     assert_schema(py_type, expected)
 

@@ -24,6 +24,7 @@ import decimal
 import enum
 import inspect
 import sys
+import types
 import uuid
 from typing import (
     TYPE_CHECKING,
@@ -572,7 +573,7 @@ class UnionSchema(Schema):
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
         origin = get_origin(py_type)
-        return origin == Union
+        return origin == Union or origin == types.UnionType
 
     def __init__(self, py_type: Type[Union[Any]], namespace: Optional[str] = None, options: Option = Option(0)):
         """
