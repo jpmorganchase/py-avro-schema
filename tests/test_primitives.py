@@ -11,6 +11,7 @@
 
 import enum
 import re
+import sys
 from typing import (
     Dict,
     List,
@@ -240,6 +241,9 @@ def test_union_string_int():
     expected = ["string", "long"]
     assert_schema(py_type, expected)
 
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="Requires Python 3.10+")
+def test_union_string_int_py310():
     py_type = str | int
     expected = ["string", "long"]
     assert_schema(py_type, expected)
@@ -250,6 +254,9 @@ def test_union_string_string_int():
     expected = ["string", "long"]
     assert_schema(py_type, expected)
 
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="Requires Python 3.10+")
+def test_union_string_string_int_py310():
     py_type = str | int | str
     expected = ["string", "long"]
     assert_schema(py_type, expected)
@@ -266,6 +273,9 @@ def test_optional_str():
     expected = ["string", "null"]
     assert_schema(py_type, expected)
 
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="Requires Python 3.10+")
+def test_optional_str_py310():
     py_type = str | None
     expected = ["string", "null"]
     assert_schema(py_type, expected)
