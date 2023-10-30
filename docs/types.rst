@@ -187,7 +187,7 @@ Is output as:
 
 
 :class:`typing.Union` and :class:`types.UnionType` (``X | Y``)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Avro schema: JSON array of multiple Avro schemas
 
