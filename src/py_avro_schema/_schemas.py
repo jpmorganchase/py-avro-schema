@@ -37,6 +37,7 @@ from typing import (
     Tuple,
     Type,
     Union,
+    cast,
     get_args,
     get_origin,
     get_type_hints,
@@ -469,12 +470,22 @@ class DecimalSchema(Schema):
         args = get_args(py_type)
         if origin is Annotated and args and args[0] is decimal.Decimal:
             # Annotated[decimal.Decimal, (4, 2)]
-            return args[1]
+            size_args = args[1]
         elif origin is decimal.Decimal:
             # Deprecated pas.DecimalType[4, 2]
-            return get_args(py_type)
-        # Anything else is not a supported decimal type
-        raise TypeError(f"{py_type} is not a decimal type")
+            size_args = args
+        else:
+            # Anything else is not a supported decimal type
+            raise TypeError(f"{py_type} is not a decimal type")
+        if cls._validate_size_tuple(size_args):
+            return cast(Tuple[int, int], size_args)
+        else:
+            raise TypeError(f"{py_type} is not annotated with a tuple of integers (precision, scale)")
+
+    @staticmethod
+    def _validate_size_tuple(tuple_: Tuple) -> bool:
+        """Checks whether a given tuple is a tuple of 2 integers (precision, scale)"""
+        return len(tuple_) == 2 and all(isinstance(item, int) for item in tuple_)
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""

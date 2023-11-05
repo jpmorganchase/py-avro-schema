@@ -14,6 +14,8 @@ import decimal
 import uuid
 from typing import Annotated, Any, Dict, List
 
+import pytest
+
 import py_avro_schema as pas
 from py_avro_schema._testing import assert_schema
 
@@ -97,6 +99,53 @@ def test_annotated_decimal():
         "scale": 2,
     }
     assert_schema(py_type, expected)
+
+
+def test_annotated_decimal_neg_scale():
+    py_type = Annotated[decimal.Decimal, (5, -2)]
+    expected = {
+        "type": "bytes",
+        "logicalType": "decimal",
+        "precision": 5,
+        "scale": -2,
+    }
+    assert_schema(py_type, expected)
+
+
+def test_annotated_decimal_bad_no_tuple():
+    py_type = Annotated[decimal.Decimal, ...]
+    expected = {
+        "type": "bytes",
+        "logicalType": "decimal",
+        "precision": 5,
+        "scale": 2,
+    }
+    with pytest.raises(pas.TypeNotSupportedError):
+        assert_schema(py_type, expected)
+
+
+def test_annotated_decimal_tuple_wrong_length():
+    py_type = Annotated[decimal.Decimal, (3, 2, 1)]
+    expected = {
+        "type": "bytes",
+        "logicalType": "decimal",
+        "precision": 5,
+        "scale": 2,
+    }
+    with pytest.raises(pas.TypeNotSupportedError):
+        assert_schema(py_type, expected)
+
+
+def test_annotated_decimal_tuple_wrong_type():
+    py_type = Annotated[decimal.Decimal, ("a", 1)]
+    expected = {
+        "type": "bytes",
+        "logicalType": "decimal",
+        "precision": 5,
+        "scale": 2,
+    }
+    with pytest.raises(pas.TypeNotSupportedError):
+        assert_schema(py_type, expected)
 
 
 def test_multiple_decimals():
