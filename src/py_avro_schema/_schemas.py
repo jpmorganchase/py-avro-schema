@@ -34,6 +34,7 @@ from typing import (
     ForwardRef,
     List,
     Optional,
+    Tuple,
     Type,
     Union,
     get_args,
@@ -443,35 +444,51 @@ class ForwardSchema(Schema):
 
 class DecimalSchema(Schema):
     """
-    An Avro bytes, logical decimal schema for a Python decimal.Decimal class
+    An Avro bytes, logical decimal schema for a Python :class:`decimal.Decimal`
 
-    For this to work, users must annotate variables with :class:`avro_schema.DecimalType` (standard lib
-    :class:`decimal.Decimal` can be used for values) like so::
+    For this to work, users must annotate variables with like so::
 
        >>> import decimal
-       >>> import py_avro_schema
-       >>> my_decimal: py_avro_schema.DecimalType[4, 2] = decimal.Decimal("12.34")
+       >>> from typing import Annotated
+       >>> my_decimal: Annotated[decimal.Decimal, (4, 2)] = decimal.Decimal("12.34")
     """
 
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
+        try:
+            cls._size(py_type)  # If we can find precision and scale, we are good
+            return True
+        except TypeError:
+            return False
+
+    @classmethod
+    def _size(cls, py_type: Type) -> Tuple[int, int]:
+        """Return a decimal precision and scale for type, if possible"""
         origin = get_origin(py_type)
-        return origin is decimal.Decimal
+        args = get_args(py_type)
+        if origin is Annotated and args and args[0] is decimal.Decimal:
+            # Annotated[decimal.Decimal, (4, 2)]
+            return args[1]
+        elif origin is decimal.Decimal:
+            # Deprecated pas.DecimalType[4, 2]
+            return get_args(py_type)
+        # Anything else is not a supported decimal type
+        raise TypeError(f"{py_type} is not a decimal type")
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""
+        precision, scale = self._size(self.py_type)
         return {
             "type": "bytes",
             "logicalType": "decimal",
-            "precision": self.py_type.__args__[0],
-            "scale": self.py_type.__args__[1],
+            "precision": precision,
+            "scale": scale,
         }
 
     def make_default(self, py_default: decimal.Decimal) -> str:
         """Return an Avro schema compliant default value for a given Python value"""
-        scale = self.py_type.__args__[1]
-        precision = self.py_type.__args__[0]
+        precision, scale = self._size(self.py_type)
         sign, digits, exp = py_default.as_tuple()
         assert isinstance(exp, int)  # for mypy
         if len(digits) > precision:
