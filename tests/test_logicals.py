@@ -10,8 +10,9 @@
 # specific language governing permissions and limitations under the License.
 
 import datetime
+import decimal
 import uuid
-from typing import Any, Dict, List
+from typing import Annotated, Any, Dict, List
 
 import py_avro_schema as pas
 from py_avro_schema._testing import assert_schema
@@ -76,7 +77,19 @@ def test_timedelta():
 
 
 def test_decimal():
+    # Deprecated custom type hint for decimals
     py_type = pas.DecimalType[5, 2]
+    expected = {
+        "type": "bytes",
+        "logicalType": "decimal",
+        "precision": 5,
+        "scale": 2,
+    }
+    assert_schema(py_type, expected)
+
+
+def test_annotated_decimal():
+    py_type = Annotated[decimal.Decimal, (5, 2)]
     expected = {
         "type": "bytes",
         "logicalType": "decimal",
