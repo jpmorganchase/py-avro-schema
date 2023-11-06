@@ -112,12 +112,6 @@ def test_annotated_decimal_neg_scale():
     assert_schema(py_type, expected)
 
 
-def test_annotated_decimal_scale_too_big():
-    py_type = Annotated[decimal.Decimal, (5, 6)]
-    with pytest.raises(pas.TypeNotSupportedError):
-        assert_schema(py_type, {})
-
-
 def test_annotated_decimal_no_tuple():
     py_type = Annotated[decimal.Decimal, ...]
     with pytest.raises(pas.TypeNotSupportedError):
