@@ -484,8 +484,13 @@ class DecimalSchema(Schema):
 
     @staticmethod
     def _validate_size_tuple(tuple_: Tuple) -> bool:
-        """Checks whether a given tuple is a tuple of 2 integers (precision, scale)"""
-        return len(tuple_) == 2 and all(isinstance(item, int) for item in tuple_)
+        """
+        Checks whether a given tuple is a tuple of (precision, scale)
+
+        Must be integers.
+        Scale must not be greater than precision
+        """
+        return len(tuple_) == 2 and all(isinstance(item, int) for item in tuple_) and tuple_[0] >= tuple_[1]
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""
