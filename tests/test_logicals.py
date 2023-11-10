@@ -91,7 +91,7 @@ def test_decimal():
 
 
 def test_annotated_decimal():
-    py_type = Annotated[decimal.Decimal, (5, 2)]
+    py_type = Annotated[decimal.Decimal, pas.DecimalMeta(precision=5, scale=2)]
     expected = {
         "type": "bytes",
         "logicalType": "decimal",
@@ -102,7 +102,7 @@ def test_annotated_decimal():
 
 
 def test_annotated_decimal_neg_scale():
-    py_type = Annotated[decimal.Decimal, (5, -2)]
+    py_type = Annotated[decimal.Decimal, pas.DecimalMeta(precision=5, scale=-2)]
     expected = {
         "type": "bytes",
         "logicalType": "decimal",
@@ -112,20 +112,14 @@ def test_annotated_decimal_neg_scale():
     assert_schema(py_type, expected)
 
 
-def test_annotated_decimal_no_tuple():
+def test_annotated_decimal_no_meta():
     py_type = Annotated[decimal.Decimal, ...]
     with pytest.raises(pas.TypeNotSupportedError):
         assert_schema(py_type, {})
 
 
-def test_annotated_decimal_tuple_wrong_length():
-    py_type = Annotated[decimal.Decimal, (3, 2, 1)]
-    with pytest.raises(pas.TypeNotSupportedError):
-        assert_schema(py_type, {})
-
-
-def test_annotated_decimal_tuple_wrong_type():
-    py_type = Annotated[decimal.Decimal, ("a", 1)]
+def test_annotated_decimal_tuple():
+    py_type = Annotated[decimal.Decimal, (5, 2)]
     with pytest.raises(pas.TypeNotSupportedError):
         assert_schema(py_type, {})
 

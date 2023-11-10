@@ -37,7 +37,6 @@ from typing import (
     Tuple,
     Type,
     Union,
-    cast,
     get_args,
     get_origin,
     get_type_hints,
@@ -45,6 +44,8 @@ from typing import (
 
 import orjson
 import typeguard
+
+import py_avro_schema._typing
 
 if TYPE_CHECKING:
     # Pydantic not necessarily required at runtime
@@ -458,59 +459,63 @@ class DecimalSchema(Schema):
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
         try:
-            cls._size(py_type)  # If we can find precision and scale, we are good
+            cls._decimal_meta(py_type)  # If we can find precision and scale, we are good
             return True
         except TypeError:
             return False
 
     @classmethod
-    def _size(cls, py_type: Type) -> Tuple[int, int]:
+    def _decimal_meta(cls, py_type: Type) -> py_avro_schema._typing.DecimalMeta:
         """Return a decimal precision and scale for type, if possible"""
         origin = get_origin(py_type)
         args = get_args(py_type)
         if origin is Annotated and args and args[0] is decimal.Decimal:
-            # Annotated[decimal.Decimal, (4, 2)]
-            size_args = args[1]
+            # Annotated[decimal.Decimal, pas.DecimalMeta(4, 2)]
+            try:
+                # At least one of the annotations should be a DecimalMeta object
+                (meta,) = (arg for arg in args[1:] if isinstance(arg, py_avro_schema._typing.DecimalMeta))
+            except ValueError:  # not enough values to unpack
+                raise TypeError(f"{py_type} is not annotated with a 'py_avro_schema.DecimalMeta` object")
+            return meta
         elif origin is decimal.Decimal:
             # Deprecated pas.DecimalType[4, 2]
-            size_args = args
+            if cls._validate_meta_tuple(args):
+                return py_avro_schema._typing.DecimalMeta(precision=args[0], scale=args[1])
+            else:
+                raise TypeError(f"{py_type} is not annotated with a tuple of integers (precision, scale)")
         else:
             # Anything else is not a supported decimal type
             raise TypeError(f"{py_type} is not a decimal type")
-        if cls._validate_size_tuple(size_args):
-            return cast(Tuple[int, int], size_args)
-        else:
-            raise TypeError(f"{py_type} is not annotated with a tuple of integers (precision, scale)")
 
     @staticmethod
-    def _validate_size_tuple(tuple_: Tuple) -> bool:
+    def _validate_meta_tuple(tuple_: Tuple) -> bool:
         """Checks whether a given tuple is a tuple of (precision, scale)"""
         return len(tuple_) == 2 and all(isinstance(item, int) for item in tuple_)
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""
-        precision, scale = self._size(self.py_type)
+        meta = self._decimal_meta(self.py_type)
         return {
             "type": "bytes",
             "logicalType": "decimal",
-            "precision": precision,
-            "scale": scale,
+            "precision": meta.precision,
+            "scale": meta.scale,
         }
 
     def make_default(self, py_default: decimal.Decimal) -> str:
         """Return an Avro schema compliant default value for a given Python value"""
-        precision, scale = self._size(self.py_type)
+        meta = self._decimal_meta(self.py_type)
         sign, digits, exp = py_default.as_tuple()
         assert isinstance(exp, int)  # for mypy
-        if len(digits) > precision:
+        if len(digits) > meta.precision:
             raise ValueError(
                 f"Default value {py_default} has precision {len(digits)} which is greater than the schema's precision "
-                f"{precision}"
+                f"{meta.precision}"
             )
-        delta = exp + scale
+        delta = exp + meta.scale
         if delta < 0:
             raise ValueError(
-                f"Default value {py_default} has scale {-exp} which is greater than the schema's scale {scale}"
+                f"Default value {py_default} has scale {-exp} which is greater than the schema's scale {meta.scale}"
             )
 
         unscaled_datum = 0
