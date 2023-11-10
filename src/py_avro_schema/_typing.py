@@ -44,6 +44,8 @@ class DecimalType:
     """
     A decimal type for type annotations including hints for precision and scale
 
+    **Deprecated**. See :class:`DecimalMeta` instead.
+
     Example
     -------
 
