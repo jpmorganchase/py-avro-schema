@@ -459,7 +459,8 @@ class DecimalSchema(Schema):
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
         try:
-            cls._decimal_meta(py_type)  # If we can find precision and scale, we are good
+            # A decimal.Decimal type with annotations indicating precision and optionally scale.
+            cls._decimal_meta(py_type)
             return True
         except TypeError:
             return False
