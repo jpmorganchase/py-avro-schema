@@ -495,12 +495,14 @@ class DecimalSchema(Schema):
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""
         meta = self._decimal_meta(self.py_type)
-        return {
+        data_ = {
             "type": "bytes",
             "logicalType": "decimal",
             "precision": meta.precision,
-            "scale": meta.scale,
         }
+        if meta.scale is not None:  # Avro spec: scale is optional, equals to zero when omitted
+            data_["scale"] = meta.scale
+        return data_
 
     def make_default(self, py_default: decimal.Decimal) -> str:
         """Return an Avro schema compliant default value for a given Python value"""
