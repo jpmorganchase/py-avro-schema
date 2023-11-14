@@ -508,6 +508,7 @@ class DecimalSchema(Schema):
     def make_default(self, py_default: decimal.Decimal) -> str:
         """Return an Avro schema compliant default value for a given Python value"""
         meta = self._decimal_meta(self.py_type)
+        scale = meta.scale or 0  # Scale is optional in Avro and should be interpreted as zero when omitted
         sign, digits, exp = py_default.as_tuple()
         assert isinstance(exp, int)  # for mypy
         if len(digits) > meta.precision:
@@ -515,10 +516,10 @@ class DecimalSchema(Schema):
                 f"Default value {py_default} has precision {len(digits)} which is greater than the schema's precision "
                 f"{meta.precision}"
             )
-        delta = exp + meta.scale
+        delta = exp + scale
         if delta < 0:
             raise ValueError(
-                f"Default value {py_default} has scale {-exp} which is greater than the schema's scale {meta.scale}"
+                f"Default value {py_default} has scale {-exp} which is greater than the schema's scale {scale}"
             )
 
         unscaled_datum = 0
