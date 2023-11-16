@@ -356,7 +356,7 @@ class DateSchema(Schema):
 
     def make_default(self, py_default: datetime.date) -> int:
         """Return an Avro schema compliant default value for a given Python value"""
-        return (py_default - datetime.date.fromtimestamp(0)).days
+        return (py_default - datetime.date(1970, 1, 1)).days
 
 
 class TimeSchema(Schema):
