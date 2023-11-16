@@ -122,6 +122,17 @@ def test_annotated_decimal_neg_scale():
     assert_schema(py_type, expected)
 
 
+def test_annotated_decimal_additional_meta():
+    py_type = Annotated[decimal.Decimal, "something else", pas.DecimalMeta(precision=5, scale=2)]
+    expected = {
+        "type": "bytes",
+        "logicalType": "decimal",
+        "precision": 5,
+        "scale": 2,
+    }
+    assert_schema(py_type, expected)
+
+
 def test_annotated_decimal_no_meta():
     py_type = Annotated[decimal.Decimal, ...]
     with pytest.raises(pas.TypeNotSupportedError):
