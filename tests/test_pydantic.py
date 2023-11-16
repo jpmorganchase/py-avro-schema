@@ -9,14 +9,15 @@
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import decimal
 import uuid
-from typing import List, Optional
+from typing import Annotated, List, Optional
 
 import pydantic
 import pytest
 import typeguard
 
-from py_avro_schema import Option
+import py_avro_schema as pas
 from py_avro_schema._testing import assert_schema
 
 
@@ -401,7 +402,7 @@ def test_field_by_alias():
             },
         ],
     }
-    assert_schema(PyType, expected, options=Option.USE_FIELD_ALIAS)
+    assert_schema(PyType, expected, options=pas.Option.USE_FIELD_ALIAS)
 
 
 def test_field_alias_generator():
@@ -420,4 +421,88 @@ def test_field_alias_generator():
             }
         ],
     }
-    assert_schema(PyType, expected, options=Option.USE_FIELD_ALIAS)
+    assert_schema(PyType, expected, options=pas.Option.USE_FIELD_ALIAS)
+
+
+def test_annotated_decimal():
+    class PyType(pydantic.BaseModel):
+        field_a: Annotated[
+            decimal.Decimal, pas.DecimalMeta(precision=3, scale=2), pydantic.BeforeValidator(lambda x: x)
+        ]
+
+    expected = {
+        "type": "record",
+        "name": "PyType",
+        "fields": [
+            {
+                "name": "field_a",
+                "type": {
+                    "type": "bytes",
+                    "logicalType": "decimal",
+                    "precision": 3,
+                    "scale": 2,
+                },
+            }
+        ],
+    }
+    assert_schema(PyType, expected)
+
+
+def test_annotated_decimal_in_base():
+    class Base(pydantic.BaseModel):
+        field_a: Annotated[
+            decimal.Decimal, pas.DecimalMeta(precision=3, scale=2), pydantic.BeforeValidator(lambda x: x)
+        ]
+
+    class PyType(Base):
+        field_b: int
+
+    expected = {
+        "type": "record",
+        "name": "PyType",
+        "fields": [
+            {
+                "name": "field_a",
+                "type": {
+                    "type": "bytes",
+                    "logicalType": "decimal",
+                    "precision": 3,
+                    "scale": 2,
+                },
+            },
+            {
+                "name": "field_b",
+                "type": "long",
+            },
+        ],
+    }
+    assert_schema(PyType, expected)
+
+
+def test_annotated_decimal_overridden():
+    class Base(pydantic.BaseModel):
+        field_a: Annotated[
+            decimal.Decimal, pas.DecimalMeta(precision=3, scale=0), pydantic.BeforeValidator(lambda x: x)
+        ]
+
+    class PyType(Base):
+        field_a: Annotated[
+            decimal.Decimal, pas.DecimalMeta(precision=3, scale=2), pydantic.BeforeValidator(lambda x: x)
+        ]
+
+    expected = {
+        "type": "record",
+        "name": "PyType",
+        "fields": [
+            {
+                "name": "field_a",
+                "type": {
+                    "type": "bytes",
+                    "logicalType": "decimal",
+                    "precision": 3,
+                    "scale": 2,
+                },
+            }
+        ],
+    }
+    assert_schema(PyType, expected)
