@@ -618,6 +618,7 @@ class UnionSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
+        py_type = _type_from_annotated(py_type)
         origin = get_origin(py_type)
 
         # Support for `X | Y` syntax available in Python 3.10+
@@ -635,9 +636,9 @@ class UnionSchema(Schema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
-        self.item_schemas = [
-            _schema_obj(arg, namespace=namespace, options=options) for arg in py_type.__args__  # type: ignore
-        ]
+        py_type = _type_from_annotated(py_type)
+        args = get_args(py_type)
+        self.item_schemas = [_schema_obj(arg, namespace=namespace, options=options) for arg in args]  # type: ignore
 
     def data(self, names: NamesType) -> JSONArray:
         """Return the schema data"""

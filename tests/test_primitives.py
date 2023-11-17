@@ -291,9 +291,22 @@ def test_union_string_int():
     assert_schema(py_type, expected)
 
 
+def test_union_string_int_annotated():
+    py_type = Annotated[Union[str, int], ...]
+    expected = ["string", "long"]
+    assert_schema(py_type, expected)
+
+
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="Requires Python 3.10+")
 def test_union_string_int_py310():
     py_type = str | int
+    expected = ["string", "long"]
+    assert_schema(py_type, expected)
+
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="Requires Python 3.10+")
+def test_union_string_int_py310_annotated():
+    py_type = Annotated[str | int, ...]
     expected = ["string", "long"]
     assert_schema(py_type, expected)
 
@@ -319,6 +332,12 @@ def test_union_of_union_string_int():
 
 def test_optional_str():
     py_type = Optional[str]
+    expected = ["string", "null"]
+    assert_schema(py_type, expected)
+
+
+def test_optional_str_annotated():
+    py_type = Annotated[Optional[str], ...]
     expected = ["string", "null"]
     assert_schema(py_type, expected)
 
