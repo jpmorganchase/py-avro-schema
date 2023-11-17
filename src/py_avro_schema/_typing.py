@@ -46,6 +46,8 @@ class DecimalMeta:
         if self.scale is not None:
             if self.scale < 0:
                 raise ValueError(f"Scale must be positive. Given value: {self.scale}")
+            elif self.scale > self.precision:
+                raise ValueError(f"Scale must be no more than precision of {self.precision}. Given value: {self.scale}")
 
 
 class DecimalType:

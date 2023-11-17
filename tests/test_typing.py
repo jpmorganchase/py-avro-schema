@@ -40,6 +40,11 @@ def test_decimal_scale_must_be_positive():
         DecimalMeta(precision=4, scale=-1)
 
 
+def test_decimal_scale_must_not_exceed_precision():
+    with pytest.raises(ValueError, match=re.escape("Scale must be no more than precision of 4. Given value: 5")):
+        DecimalMeta(precision=4, scale=5)
+
+
 def test_decimal_type():
     py_type = DecimalType[4, 2]
     assert py_type.__origin__ is decimal.Decimal
