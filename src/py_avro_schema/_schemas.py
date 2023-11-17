@@ -881,7 +881,6 @@ class PydanticSchema(RecordSchema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
-        self.py_type = py_type
         self.py_fields = py_type.model_fields
         self.record_fields = [self._record_field(name, field) for name, field in self.py_fields.items()]
 
