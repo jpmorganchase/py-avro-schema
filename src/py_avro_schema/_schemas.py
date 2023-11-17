@@ -543,8 +543,9 @@ class SequenceSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
+        py_type = _type_from_annotated(py_type)
         origin = get_origin(py_type)
-        return inspect.isclass(origin) and issubclass(origin, collections.abc.Sequence)
+        return _is_class(origin, collections.abc.Sequence)
 
     def __init__(
         self,
@@ -560,6 +561,7 @@ class SequenceSchema(Schema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
+        py_type = _type_from_annotated(py_type)
         self.items_schema = _schema_obj(py_type.__args__[0], namespace=namespace, options=options)  # type: ignore
 
     def data(self, names: NamesType) -> JSONObj:
@@ -976,7 +978,7 @@ def _is_list_dict_str_any(py_type: Type) -> bool:
         return False
 
 
-def _is_class(py_type: Type, of_types: Union[Type, Tuple[Type, ...]], include_subclasses: bool = True) -> bool:
+def _is_class(py_type: Any, of_types: Union[Type, Tuple[Type, ...]], include_subclasses: bool = True) -> bool:
     """Return whether the given type is a (sub) class of a type or types"""
     py_type = _type_from_annotated(py_type)
     if include_subclasses:

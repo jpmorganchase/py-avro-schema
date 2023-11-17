@@ -152,6 +152,12 @@ def test_string_list():
     assert_schema(py_type, expected)
 
 
+def test_string_list_annotated():
+    py_type = Annotated[List[str], ...]
+    expected = {"type": "array", "items": "string"}
+    assert_schema(py_type, expected)
+
+
 def test_string_list_lower_list():
     py_type = list[str]
     expected = {"type": "array", "items": "string"}
