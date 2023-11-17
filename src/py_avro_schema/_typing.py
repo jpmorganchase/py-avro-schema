@@ -40,7 +40,11 @@ class DecimalMeta:
     scale: Optional[int] = None
 
     def __post_init__(self):
-        """Validate input data"""
+        """
+        Validate input data
+
+        See: https://avro.apache.org/docs/1.11.1/specification/#decimal
+        """
         if self.precision < 1:
             raise ValueError(f"Precision must be at least 1. Given value: {self.precision}")
         if self.scale is not None:
