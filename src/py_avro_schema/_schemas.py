@@ -635,7 +635,7 @@ class UnionSchema(Schema):
         super().__init__(py_type, namespace=namespace, options=options)
         py_type = _type_from_annotated(py_type)
         args = get_args(py_type)
-        self.item_schemas = [_schema_obj(arg, namespace=namespace, options=options) for arg in args]  # type: ignore
+        self.item_schemas = [_schema_obj(arg, namespace=namespace, options=options) for arg in args]
 
     def data(self, names: NamesType) -> JSONArray:
         """Return the schema data"""
