@@ -344,11 +344,7 @@ class DateSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        return (
-            inspect.isclass(py_type)
-            and issubclass(py_type, datetime.date)
-            and not issubclass(py_type, datetime.datetime)
-        )
+        return _is_class(py_type, datetime.date) and not _is_class(py_type, datetime.datetime)
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""

@@ -29,6 +29,15 @@ def test_date():
     assert_schema(py_type, expected)
 
 
+def test_date_annotated():
+    py_type = Annotated[datetime.date, ...]
+    expected = {
+        "type": "int",
+        "logicalType": "date",
+    }
+    assert_schema(py_type, expected)
+
+
 def test_time():
     py_type = datetime.time
     expected = {
