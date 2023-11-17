@@ -75,6 +75,15 @@ def test_datetime():
     assert_schema(py_type, expected)
 
 
+def test_datetime_annotated():
+    py_type = Annotated[datetime.datetime, ...]
+    expected = {
+        "type": "long",
+        "logicalType": "timestamp-micros",
+    }
+    assert_schema(py_type, expected)
+
+
 def test_datetime_milliseconds():
     py_type = datetime.datetime
     expected = {
