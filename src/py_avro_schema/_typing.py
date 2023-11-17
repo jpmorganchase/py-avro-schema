@@ -43,6 +43,9 @@ class DecimalMeta:
         """Validate input data"""
         if self.precision < 1:
             raise ValueError(f"Precision must be at least 1. Given value: {self.precision}")
+        if self.scale is not None:
+            if self.scale < 0:
+                raise ValueError(f"Scale must be positive. Given value: {self.scale}")
 
 
 class DecimalType:
