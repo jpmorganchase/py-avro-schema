@@ -39,6 +39,11 @@ class DecimalMeta:
     precision: int
     scale: Optional[int] = None
 
+    def __post_init__(self):
+        """Validate input data"""
+        if self.precision < 1:
+            raise ValueError(f"Precision must be at least 1. Given value: {self.precision}")
+
 
 class DecimalType:
     """
