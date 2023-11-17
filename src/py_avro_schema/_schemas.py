@@ -920,6 +920,7 @@ class PlainClassSchema(RecordSchema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
+        py_type = _type_from_annotated(py_type)
         return (
             # Dataclasses are handled above
             not dataclasses.is_dataclass(py_type)
@@ -940,6 +941,7 @@ class PlainClassSchema(RecordSchema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
+        py_type = _type_from_annotated(py_type)
         # Extracting arguments from __init__, dropping first argument `self`.
         self.py_fields = list(inspect.signature(py_type.__init__).parameters.values())[1:]
         self.record_fields = [self._record_field(field) for field in self.py_fields]
