@@ -14,7 +14,7 @@ import datetime
 import decimal
 import enum
 import re
-from typing import Dict, List, Optional
+from typing import Annotated, Dict, List, Optional
 
 import pytest
 import typeguard
@@ -39,6 +39,24 @@ def test_string_field():
         ],
     }
     assert_schema(PyType, expected)
+
+
+def test_class_annotated():
+    @dataclasses.dataclass
+    class PyType:
+        field_a: str
+
+    expected = {
+        "type": "record",
+        "name": "PyType",
+        "fields": [
+            {
+                "name": "field_a",
+                "type": "string",
+            }
+        ],
+    }
+    assert_schema(Annotated[PyType, ...], expected)
 
 
 def test_string_field_mandatory_default():

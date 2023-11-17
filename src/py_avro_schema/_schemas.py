@@ -835,6 +835,7 @@ class DataclassSchema(RecordSchema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
+        py_type = _type_from_annotated(py_type)
         return dataclasses.is_dataclass(py_type)
 
     def __init__(self, py_type: Type, namespace: Optional[str] = None, options: Option = Option(0)):
@@ -846,6 +847,7 @@ class DataclassSchema(RecordSchema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
+        py_type = _type_from_annotated(py_type)
         self.py_fields = dataclasses.fields(py_type)
         self.record_fields = [self._record_field(field) for field in self.py_fields]
 
