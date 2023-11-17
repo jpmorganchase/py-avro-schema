@@ -578,8 +578,11 @@ class DictSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
+        py_type = _type_from_annotated(py_type)
         origin = get_origin(py_type)
-        return inspect.isclass(origin) and issubclass(origin, collections.abc.Mapping) and py_type.__args__[1] != Any
+        args = get_args(py_type)
+        # TODO: should we return false if args does not have 2 items?
+        return _is_class(origin, collections.abc.Mapping) and args[1] != Any  # dict values must be strongly typed
 
     def __init__(
         self,
@@ -595,9 +598,11 @@ class DictSchema(Schema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
-        if py_type.__args__[0] != str:  # type: ignore
+        py_type = _type_from_annotated(py_type)
+        args = get_args(py_type)
+        if args[0] != str:  # type: ignore
             raise TypeError(f"Cannot generate Avro mapping schema for Python dictionary {py_type} with non-string keys")
-        self.values_schema = _schema_obj(py_type.__args__[1], namespace=namespace, options=options)  # type: ignore
+        self.values_schema = _schema_obj(args[1], namespace=namespace, options=options)  # type: ignore
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""

@@ -222,6 +222,12 @@ def test_string_dict():
     assert_schema(py_type, expected)
 
 
+def test_string_dict_annotated():
+    py_type = Annotated[Dict[str, str], ...]
+    expected = {"type": "map", "values": "string"}
+    assert_schema(py_type, expected)
+
+
 def test_string_dict_lower_dict():
     py_type = dict[str, str]
     expected = {"type": "map", "values": "string"}
