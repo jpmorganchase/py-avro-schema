@@ -597,9 +597,9 @@ class DictSchema(Schema):
         super().__init__(py_type, namespace=namespace, options=options)
         py_type = _type_from_annotated(py_type)
         args = get_args(py_type)
-        if args[0] != str:  # type: ignore
+        if args[0] != str:
             raise TypeError(f"Cannot generate Avro mapping schema for Python dictionary {py_type} with non-string keys")
-        self.values_schema = _schema_obj(args[1], namespace=namespace, options=options)  # type: ignore
+        self.values_schema = _schema_obj(args[1], namespace=namespace, options=options)
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""
