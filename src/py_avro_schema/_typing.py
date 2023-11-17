@@ -13,16 +13,38 @@
 """
 Additional type hint classes etc
 """
+import dataclasses
 import decimal
 from typing import _GenericAlias  # type: ignore
-from typing import Tuple
+from typing import Optional, Tuple
 
 import typeguard
+
+
+@dataclasses.dataclass
+class DecimalMeta:
+    """
+    Meta data to annotate a :class:`decimal.Decimal` with precision and scale information
+
+    Example
+    -------
+
+    >>> import decimal
+    >>> from typing import Annotated
+    >>> my_decimal: Annotated[decimal.Decimal, DecimalMeta(precision=4, scale=2)]
+
+    If scale is omitted it defaults to zero as per Avro specification.
+    """
+
+    precision: int
+    scale: Optional[int] = None
 
 
 class DecimalType:
     """
     A decimal type for type annotations including hints for precision and scale
+
+    **Deprecated**. See :class:`DecimalMeta` instead.
 
     Example
     -------

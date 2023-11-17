@@ -422,22 +422,25 @@ Avro schema: ``null``
 This schema is typically used as a "unioned" type where the default value is ``None``.
 
 
-:class:`py_avro_schema.DecimalType`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+:class:`decimal.Decimal`
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 | Avro schema: ``bytes``
 | Avro logical type: ``decimal``
 
-:class:`py_avro_schema.DecimalType` is a generic type for standard library :class:`decimal.Decimal` values.
-The generic type is used to define the **scale** and **precision** of a field.
+The standard library's :class:`decimal.Decimal` should be annotated with additional metadata to define the decimal
+**precision** and **scale**.
 
 For example, a decimal field with precision 4 and scale 2 is defined like this::
 
+   import decimal
+   from typing import Annotated
    import py_avro_schema as pas
 
-   construction_costs: pas.DecimalType[4, 2]
+   construction_costs: Annotated[decimal.Decimal, pas.DecimalMeta(precision=4, scale=2)]
 
-Values can be assigned like normal, e.g. ``construction_costs = decimal.Decimal("12.34")``.
+Values can be assigned like normal, e.g. ``construction_costs = decimal.Decimal("12.34")``. The scale attribute can be
+omitted as per Avro specification in which case the scale equals to zero.
 
 The Avro schema for the above type is:
 

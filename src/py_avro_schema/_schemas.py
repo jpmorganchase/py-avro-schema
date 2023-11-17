@@ -34,6 +34,7 @@ from typing import (
     ForwardRef,
     List,
     Optional,
+    Tuple,
     Type,
     Union,
     get_args,
@@ -43,6 +44,8 @@ from typing import (
 
 import orjson
 import typeguard
+
+import py_avro_schema._typing
 
 if TYPE_CHECKING:
     # Pydantic not necessarily required at runtime
@@ -242,9 +245,7 @@ class PrimitiveSchema(Schema):
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
         return any(
-            py_type == type_  # Either a straight match
-            # Or we match on subclasses, if :attr:`primitive_types` allows us
-            or (include_subclasses and inspect.isclass(py_type) and issubclass(py_type, type_))
+            _is_class(py_type, type_, include_subclasses=include_subclasses)
             for type_, include_subclasses, _ in cls.primitive_types
         )
 
@@ -258,7 +259,11 @@ class PrimitiveSchema(Schema):
             return "float"
         else:
             # We're guaranteed a match since :meth:`handles_types` applies first
-            return next(data for type_, _, data in self.primitive_types if issubclass(self.py_type, type_))
+            return next(
+                data
+                for type_, include_subclasses, data in self.primitive_types
+                if _is_class(self.py_type, type_, include_subclasses=include_subclasses)
+            )
 
 
 class StrSubclassSchema(Schema):
@@ -313,7 +318,7 @@ class UUIDSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        return (inspect.isclass(py_type) and issubclass(py_type, uuid.UUID)) or _is_annotated_uuid(py_type)
+        return _is_class(py_type, uuid.UUID)
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""
@@ -443,41 +448,75 @@ class ForwardSchema(Schema):
 
 class DecimalSchema(Schema):
     """
-    An Avro bytes, logical decimal schema for a Python decimal.Decimal class
+    An Avro bytes, logical decimal schema for a Python :class:`decimal.Decimal`
 
-    For this to work, users must annotate variables with :class:`avro_schema.DecimalType` (standard lib
-    :class:`decimal.Decimal` can be used for values) like so::
+    For this to work, users must annotate variables with like so::
 
        >>> import decimal
-       >>> import py_avro_schema
-       >>> my_decimal: py_avro_schema.DecimalType[4, 2] = decimal.Decimal("12.34")
+       >>> from typing import Annotated
+       >>> my_decimal: Annotated[decimal.Decimal, (4, 2)] = decimal.Decimal("12.34")
     """
 
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
+        try:
+            # A decimal.Decimal type with annotations indicating precision and optionally scale.
+            cls._decimal_meta(py_type)
+            return True
+        except TypeError:
+            return False
+
+    @classmethod
+    def _decimal_meta(cls, py_type: Type) -> py_avro_schema._typing.DecimalMeta:
+        """Return a decimal precision and scale for type, if possible"""
         origin = get_origin(py_type)
-        return origin is decimal.Decimal
+        args = get_args(py_type)
+        if origin is Annotated and args and args[0] is decimal.Decimal:
+            # Annotated[decimal.Decimal, pas.DecimalMeta(4, 2)]
+            try:
+                # At least one of the annotations should be a DecimalMeta object
+                (meta,) = (arg for arg in args[1:] if isinstance(arg, py_avro_schema._typing.DecimalMeta))
+            except ValueError:  # not enough values to unpack
+                raise TypeError(f"{py_type} is not annotated with a 'py_avro_schema.DecimalMeta` object")
+            return meta
+        elif origin is decimal.Decimal:
+            # Deprecated pas.DecimalType[4, 2]
+            if cls._validate_meta_tuple(args):
+                return py_avro_schema._typing.DecimalMeta(precision=args[0], scale=args[1])
+            else:
+                raise TypeError(f"{py_type} is not annotated with a tuple of integers (precision, scale)")
+        else:
+            # Anything else is not a supported decimal type
+            raise TypeError(f"{py_type} is not a decimal type")
+
+    @staticmethod
+    def _validate_meta_tuple(tuple_: Tuple) -> bool:
+        """Checks whether a given tuple is a tuple of (precision, scale)"""
+        return len(tuple_) == 2 and all(isinstance(item, int) for item in tuple_)
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""
-        return {
+        meta = self._decimal_meta(self.py_type)
+        data_ = {
             "type": "bytes",
             "logicalType": "decimal",
-            "precision": self.py_type.__args__[0],
-            "scale": self.py_type.__args__[1],
+            "precision": meta.precision,
         }
+        if meta.scale is not None:  # Avro spec: scale is optional, equals to zero when omitted
+            data_["scale"] = meta.scale
+        return data_
 
     def make_default(self, py_default: decimal.Decimal) -> str:
         """Return an Avro schema compliant default value for a given Python value"""
-        scale = self.py_type.__args__[1]
-        precision = self.py_type.__args__[0]
+        meta = self._decimal_meta(self.py_type)
+        scale = meta.scale or 0  # Scale is optional in Avro and should be interpreted as zero when omitted
         sign, digits, exp = py_default.as_tuple()
         assert isinstance(exp, int)  # for mypy
-        if len(digits) > precision:
+        if len(digits) > meta.precision:
             raise ValueError(
                 f"Default value {py_default} has precision {len(digits)} which is greater than the schema's precision "
-                f"{precision}"
+                f"{meta.precision}"
             )
         delta = exp + scale
         if delta < 0:
@@ -835,23 +874,14 @@ class PydanticSchema(RecordSchema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
+        self.py_type = py_type
         self.py_fields = py_type.model_fields
-        self.raw_annotations = py_type.__annotations__
         self.record_fields = [self._record_field(name, field) for name, field in self.py_fields.items()]
 
     def _record_field(self, name: str, py_field: pydantic.fields.FieldInfo) -> RecordField:
         """Return an Avro record field object for a given Pydantic model field"""
         default = dataclasses.MISSING if py_field.is_required() else py_field.get_default(call_default_factory=True)
-        # Pydantic 2 resolves forward references for us. To avoid infinite recursion, we check if the unresolved raw
-        # annoation is a forward reference. If so, we use that instead of Pydantic's resolved type hint. There might be
-        # a better way to un-resolve the forward reference...
-        # This does not support forward references from base model classes. If required we might need to traverse class
-        # hierarchy to get the raw annotations?
-        if isinstance(self.raw_annotations.get(name), (str, ForwardRef)):
-            py_type = self.raw_annotations[name]
-        else:
-            py_type = py_field.annotation
-
+        py_type = self._annotation(name)
         record_name = py_field.alias if Option.USE_FIELD_ALIAS in self.options and py_field.alias else name
         field_obj = RecordField(
             py_type=py_type,
@@ -862,6 +892,18 @@ class PydanticSchema(RecordSchema):
             options=self.options,
         )
         return field_obj
+
+    def _annotation(self, field_name: str) -> Type:
+        """
+        Fetch the raw annotation for a given field name
+
+        Pydantic "unpacks" annotated and forward ref types in their FieldInfo API. We need to access to full, raw
+        annotated type hints instead.
+        """
+        for class_ in self.py_type.mro():
+            if class_.__annotations__.get(field_name):
+                return class_.__annotations__[field_name]
+        raise ValueError(f"{field_name} is not a field of {self.py_type}")  # Should never happen
 
 
 class PlainClassSchema(RecordSchema):
@@ -934,10 +976,26 @@ def _is_list_dict_str_any(py_type: Type) -> bool:
         return False
 
 
-def _is_annotated_uuid(py_type: Type) -> bool:
-    """Return whether a given type is ``Annotated[uuid.UUID, ...]``"""
-    args = get_args(py_type)
-    if args:
-        return get_origin(py_type) == Annotated and issubclass(get_args(py_type)[0], uuid.UUID)
+def _is_class(py_type: Type, of_types: Union[Type, Tuple[Type, ...]], include_subclasses: bool = True) -> bool:
+    """Return whether the given type is a (sub) class of a type or types"""
+    py_type = _type_from_annotated(py_type)
+    if include_subclasses:
+        return inspect.isclass(py_type) and issubclass(py_type, of_types)
     else:
-        return False
+        if isinstance(of_types, tuple):
+            return py_type in of_types
+        else:
+            return py_type == of_types
+
+
+def _type_from_annotated(py_type: Type) -> Type:
+    """
+    Return the "principal" type if the given type is annotated like this ``Annotated[{principal_type}, ...]``
+
+    If it's not annotated, just return the type itself
+    """
+    args = get_args(py_type)
+    if get_origin(py_type) == Annotated and args:
+        return args[0]
+    else:
+        return py_type

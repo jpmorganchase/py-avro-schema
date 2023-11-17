@@ -10,8 +10,11 @@
 # specific language governing permissions and limitations under the License.
 
 import datetime
+import decimal
 import uuid
-from typing import Any, Dict, List
+from typing import Annotated, Any, Dict, List
+
+import pytest
 
 import py_avro_schema as pas
 from py_avro_schema._testing import assert_schema
@@ -76,6 +79,7 @@ def test_timedelta():
 
 
 def test_decimal():
+    # Deprecated custom type hint for decimals
     py_type = pas.DecimalType[5, 2]
     expected = {
         "type": "bytes",
@@ -84,6 +88,61 @@ def test_decimal():
         "scale": 2,
     }
     assert_schema(py_type, expected)
+
+
+def test_annotated_decimal():
+    py_type = Annotated[decimal.Decimal, pas.DecimalMeta(precision=5, scale=2)]
+    expected = {
+        "type": "bytes",
+        "logicalType": "decimal",
+        "precision": 5,
+        "scale": 2,
+    }
+    assert_schema(py_type, expected)
+
+
+def test_annotated_decimal_default_scale():
+    py_type = Annotated[decimal.Decimal, pas.DecimalMeta(precision=5)]
+    expected = {
+        "type": "bytes",
+        "logicalType": "decimal",
+        "precision": 5,
+    }
+    assert_schema(py_type, expected)
+
+
+def test_annotated_decimal_neg_scale():
+    py_type = Annotated[decimal.Decimal, pas.DecimalMeta(precision=5, scale=-2)]
+    expected = {
+        "type": "bytes",
+        "logicalType": "decimal",
+        "precision": 5,
+        "scale": -2,
+    }
+    assert_schema(py_type, expected)
+
+
+def test_annotated_decimal_additional_meta():
+    py_type = Annotated[decimal.Decimal, "something else", pas.DecimalMeta(precision=5, scale=2)]
+    expected = {
+        "type": "bytes",
+        "logicalType": "decimal",
+        "precision": 5,
+        "scale": 2,
+    }
+    assert_schema(py_type, expected)
+
+
+def test_annotated_decimal_no_meta():
+    py_type = Annotated[decimal.Decimal, ...]
+    with pytest.raises(pas.TypeNotSupportedError):
+        assert_schema(py_type, {})
+
+
+def test_annotated_decimal_tuple():
+    py_type = Annotated[decimal.Decimal, (5, 2)]
+    with pytest.raises(pas.TypeNotSupportedError):
+        assert_schema(py_type, {})
 
 
 def test_multiple_decimals():
