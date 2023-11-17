@@ -13,6 +13,7 @@ import enum
 import re
 import sys
 from typing import (
+    Annotated,
     Dict,
     List,
     Mapping,
@@ -32,6 +33,12 @@ from py_avro_schema._testing import assert_schema
 
 def test_str():
     py_type = str
+    expected = "string"
+    assert_schema(py_type, expected)
+
+
+def test_str_annotated():
+    py_type = Annotated[str, ...]
     expected = "string"
     assert_schema(py_type, expected)
 
@@ -77,6 +84,12 @@ def test_int():
     assert_schema(py_type, expected)
 
 
+def test_int_annotated():
+    py_type = Annotated[int, ...]
+    expected = "long"
+    assert_schema(py_type, expected)
+
+
 def test_int_32():
     py_type = int
     expected = "int"
@@ -90,8 +103,20 @@ def test_bool():
     assert_schema(py_type, expected)
 
 
+def test_bool_annotated():
+    py_type = Annotated[bool, ...]
+    expected = "boolean"
+    assert_schema(py_type, expected)
+
+
 def test_float():
     py_type = float
+    expected = "double"
+    assert_schema(py_type, expected)
+
+
+def test_float_annotated():
+    py_type = Annotated[float, ...]
     expected = "double"
     assert_schema(py_type, expected)
 
@@ -111,6 +136,12 @@ def test_bytes():
 
 def test_none():
     py_type = type(None)
+    expected = "null"
+    assert_schema(py_type, expected)
+
+
+def test_none_annotated():
+    py_type = Annotated[type(None), ...]
     expected = "null"
     assert_schema(py_type, expected)
 
