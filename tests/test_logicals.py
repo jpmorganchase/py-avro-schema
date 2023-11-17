@@ -105,6 +105,17 @@ def test_timedelta():
     assert_schema(py_type, expected)
 
 
+def test_timedelta_annotated():
+    py_type = Annotated[datetime.timedelta, ...]
+    expected = {
+        "type": "fixed",
+        "name": "datetime.timedelta",
+        "size": 12,
+        "logicalType": "duration",
+    }
+    assert_schema(py_type, expected)
+
+
 def test_decimal():
     # Deprecated custom type hint for decimals
     py_type = pas.DecimalType[5, 2]

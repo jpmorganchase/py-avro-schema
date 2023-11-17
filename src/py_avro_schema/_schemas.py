@@ -406,7 +406,7 @@ class TimeDeltaSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        return inspect.isclass(py_type) and issubclass(py_type, datetime.timedelta)
+        return _is_class(py_type, datetime.timedelta)
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""
