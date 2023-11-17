@@ -212,6 +212,15 @@ def test_uuid():
     assert_schema(py_type, expected)
 
 
+def test_uuid_annotated():
+    py_type = Annotated[uuid.UUID, ...]
+    expected = {
+        "type": "string",
+        "logicalType": "uuid",
+    }
+    assert_schema(py_type, expected)
+
+
 def test_dict_json_logical_string_field():
     py_type = Dict[str, Any]
     expected = {
