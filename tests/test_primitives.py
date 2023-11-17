@@ -366,6 +366,23 @@ def test_enum():
     assert_schema(PyType, expected)
 
 
+def test_enum_annotated():
+    class PyType(enum.Enum):
+        RED = "RED"
+        GREEN = "GREEN"
+
+    expected = {
+        "type": "enum",
+        "name": "PyType",
+        "symbols": [
+            "RED",
+            "GREEN",
+        ],
+        "default": "RED",
+    }
+    assert_schema(Annotated[PyType, ...], expected)
+
+
 def test_enum_str_subclass():
     class PyType(str, enum.Enum):
         RED = "RED"

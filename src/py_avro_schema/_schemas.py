@@ -674,6 +674,7 @@ class NamedSchema(Schema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
+        py_type = _type_from_annotated(py_type)
         self.name = py_type.__name__
 
     def __str__(self):
@@ -707,7 +708,7 @@ class EnumSchema(NamedSchema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        return inspect.isclass(py_type) and issubclass(py_type, enum.Enum)
+        return _is_class(py_type, enum.Enum)
 
     def __init__(self, py_type: Type[enum.Enum], namespace: Optional[str] = None, options: Option = Option(0)):
         """
@@ -718,6 +719,7 @@ class EnumSchema(NamedSchema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
+        py_type = _type_from_annotated(py_type)
         self.symbols = [member.value for member in py_type]
         symbol_types = {type(symbol) for symbol in self.symbols}
         if symbol_types != {str}:
