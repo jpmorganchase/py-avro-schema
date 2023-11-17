@@ -562,7 +562,8 @@ class SequenceSchema(Schema):
         """
         super().__init__(py_type, namespace=namespace, options=options)
         py_type = _type_from_annotated(py_type)
-        self.items_schema = _schema_obj(py_type.__args__[0], namespace=namespace, options=options)  # type: ignore
+        args = get_args(py_type)  # TODO: validate if args has exactly 1 item?
+        self.items_schema = _schema_obj(args[0], namespace=namespace, options=options)
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""
