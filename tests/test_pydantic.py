@@ -38,6 +38,23 @@ def test_string_field():
     assert_schema(PyType, expected)
 
 
+def test_class_annotated():
+    class PyType(pydantic.BaseModel):
+        field_a: str
+
+    expected = {
+        "type": "record",
+        "name": "PyType",
+        "fields": [
+            {
+                "name": "field_a",
+                "type": "string",
+            }
+        ],
+    }
+    assert_schema(Annotated[PyType, ...], expected)
+
+
 def test_string_field_default():
     class PyType(pydantic.BaseModel):
         field_a: str = ""
