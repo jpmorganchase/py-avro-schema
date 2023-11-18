@@ -344,11 +344,7 @@ class DateSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        return (
-            inspect.isclass(py_type)
-            and issubclass(py_type, datetime.date)
-            and not issubclass(py_type, datetime.datetime)
-        )
+        return _is_class(py_type, datetime.date) and not _is_class(py_type, datetime.datetime)
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""
@@ -365,7 +361,7 @@ class TimeSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        return inspect.isclass(py_type) and issubclass(py_type, datetime.time)
+        return _is_class(py_type, datetime.time)
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""
@@ -390,7 +386,7 @@ class DateTimeSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        return inspect.isclass(py_type) and issubclass(py_type, datetime.datetime)
+        return _is_class(py_type, datetime.datetime)
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""
@@ -410,7 +406,7 @@ class TimeDeltaSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        return inspect.isclass(py_type) and issubclass(py_type, datetime.timedelta)
+        return _is_class(py_type, datetime.timedelta)
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""
@@ -543,8 +539,9 @@ class SequenceSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
+        py_type = _type_from_annotated(py_type)
         origin = get_origin(py_type)
-        return inspect.isclass(origin) and issubclass(origin, collections.abc.Sequence)
+        return _is_class(origin, collections.abc.Sequence)
 
     def __init__(
         self,
@@ -560,7 +557,9 @@ class SequenceSchema(Schema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
-        self.items_schema = _schema_obj(py_type.__args__[0], namespace=namespace, options=options)  # type: ignore
+        py_type = _type_from_annotated(py_type)
+        args = get_args(py_type)  # TODO: validate if args has exactly 1 item?
+        self.items_schema = _schema_obj(args[0], namespace=namespace, options=options)
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""
@@ -576,8 +575,11 @@ class DictSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
+        py_type = _type_from_annotated(py_type)
         origin = get_origin(py_type)
-        return inspect.isclass(origin) and issubclass(origin, collections.abc.Mapping) and py_type.__args__[1] != Any
+        args = get_args(py_type)
+        # TODO: should we return false if args does not have 2 items?
+        return _is_class(origin, collections.abc.Mapping) and args[1] != Any  # dict values must be strongly typed
 
     def __init__(
         self,
@@ -593,9 +595,11 @@ class DictSchema(Schema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
-        if py_type.__args__[0] != str:  # type: ignore
+        py_type = _type_from_annotated(py_type)
+        args = get_args(py_type)
+        if args[0] != str:
             raise TypeError(f"Cannot generate Avro mapping schema for Python dictionary {py_type} with non-string keys")
-        self.values_schema = _schema_obj(py_type.__args__[1], namespace=namespace, options=options)  # type: ignore
+        self.values_schema = _schema_obj(args[1], namespace=namespace, options=options)
 
     def data(self, names: NamesType) -> JSONObj:
         """Return the schema data"""
@@ -611,6 +615,7 @@ class UnionSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
+        py_type = _type_from_annotated(py_type)
         origin = get_origin(py_type)
 
         # Support for `X | Y` syntax available in Python 3.10+
@@ -628,9 +633,9 @@ class UnionSchema(Schema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
-        self.item_schemas = [
-            _schema_obj(arg, namespace=namespace, options=options) for arg in py_type.__args__  # type: ignore
-        ]
+        py_type = _type_from_annotated(py_type)
+        args = get_args(py_type)
+        self.item_schemas = [_schema_obj(arg, namespace=namespace, options=options) for arg in args]
 
     def data(self, names: NamesType) -> JSONArray:
         """Return the schema data"""
@@ -666,6 +671,7 @@ class NamedSchema(Schema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
+        py_type = _type_from_annotated(py_type)
         self.name = py_type.__name__
 
     def __str__(self):
@@ -699,7 +705,7 @@ class EnumSchema(NamedSchema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        return inspect.isclass(py_type) and issubclass(py_type, enum.Enum)
+        return _is_class(py_type, enum.Enum)
 
     def __init__(self, py_type: Type[enum.Enum], namespace: Optional[str] = None, options: Option = Option(0)):
         """
@@ -710,6 +716,7 @@ class EnumSchema(NamedSchema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
+        py_type = _type_from_annotated(py_type)
         self.symbols = [member.value for member in py_type]
         symbol_types = {type(symbol) for symbol in self.symbols}
         if symbol_types != {str}:
@@ -828,6 +835,7 @@ class DataclassSchema(RecordSchema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
+        py_type = _type_from_annotated(py_type)
         return dataclasses.is_dataclass(py_type)
 
     def __init__(self, py_type: Type, namespace: Optional[str] = None, options: Option = Option(0)):
@@ -839,6 +847,7 @@ class DataclassSchema(RecordSchema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
+        py_type = _type_from_annotated(py_type)
         self.py_fields = dataclasses.fields(py_type)
         self.record_fields = [self._record_field(field) for field in self.py_fields]
 
@@ -863,6 +872,7 @@ class PydanticSchema(RecordSchema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
+        py_type = _type_from_annotated(py_type)
         return hasattr(py_type, "__fields__")
 
     def __init__(self, py_type: Type[pydantic.BaseModel], namespace: Optional[str] = None, options: Option = Option(0)):
@@ -874,7 +884,6 @@ class PydanticSchema(RecordSchema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
-        self.py_type = py_type
         self.py_fields = py_type.model_fields
         self.record_fields = [self._record_field(name, field) for name, field in self.py_fields.items()]
 
@@ -912,6 +921,7 @@ class PlainClassSchema(RecordSchema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
+        py_type = _type_from_annotated(py_type)
         return (
             # Dataclasses are handled above
             not dataclasses.is_dataclass(py_type)
@@ -932,6 +942,7 @@ class PlainClassSchema(RecordSchema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
+        py_type = _type_from_annotated(py_type)
         # Extracting arguments from __init__, dropping first argument `self`.
         self.py_fields = list(inspect.signature(py_type.__init__).parameters.values())[1:]
         self.record_fields = [self._record_field(field) for field in self.py_fields]
@@ -976,7 +987,7 @@ def _is_list_dict_str_any(py_type: Type) -> bool:
         return False
 
 
-def _is_class(py_type: Type, of_types: Union[Type, Tuple[Type, ...]], include_subclasses: bool = True) -> bool:
+def _is_class(py_type: Any, of_types: Union[Type, Tuple[Type, ...]], include_subclasses: bool = True) -> bool:
     """Return whether the given type is a (sub) class of a type or types"""
     py_type = _type_from_annotated(py_type)
     if include_subclasses:

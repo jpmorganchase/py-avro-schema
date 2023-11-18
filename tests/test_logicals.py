@@ -29,8 +29,26 @@ def test_date():
     assert_schema(py_type, expected)
 
 
+def test_date_annotated():
+    py_type = Annotated[datetime.date, ...]
+    expected = {
+        "type": "int",
+        "logicalType": "date",
+    }
+    assert_schema(py_type, expected)
+
+
 def test_time():
     py_type = datetime.time
+    expected = {
+        "type": "long",
+        "logicalType": "time-micros",
+    }
+    assert_schema(py_type, expected)
+
+
+def test_time_annotated():
+    py_type = Annotated[datetime.time, ...]
     expected = {
         "type": "long",
         "logicalType": "time-micros",
@@ -57,6 +75,15 @@ def test_datetime():
     assert_schema(py_type, expected)
 
 
+def test_datetime_annotated():
+    py_type = Annotated[datetime.datetime, ...]
+    expected = {
+        "type": "long",
+        "logicalType": "timestamp-micros",
+    }
+    assert_schema(py_type, expected)
+
+
 def test_datetime_milliseconds():
     py_type = datetime.datetime
     expected = {
@@ -69,6 +96,17 @@ def test_datetime_milliseconds():
 
 def test_timedelta():
     py_type = datetime.timedelta
+    expected = {
+        "type": "fixed",
+        "name": "datetime.timedelta",
+        "size": 12,
+        "logicalType": "duration",
+    }
+    assert_schema(py_type, expected)
+
+
+def test_timedelta_annotated():
+    py_type = Annotated[datetime.timedelta, ...]
     expected = {
         "type": "fixed",
         "name": "datetime.timedelta",
@@ -167,6 +205,15 @@ def test_multiple_decimals():
 
 def test_uuid():
     py_type = uuid.UUID
+    expected = {
+        "type": "string",
+        "logicalType": "uuid",
+    }
+    assert_schema(py_type, expected)
+
+
+def test_uuid_annotated():
+    py_type = Annotated[uuid.UUID, ...]
     expected = {
         "type": "string",
         "logicalType": "uuid",

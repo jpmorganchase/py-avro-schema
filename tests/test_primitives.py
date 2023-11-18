@@ -13,6 +13,7 @@ import enum
 import re
 import sys
 from typing import (
+    Annotated,
     Dict,
     List,
     Mapping,
@@ -32,6 +33,12 @@ from py_avro_schema._testing import assert_schema
 
 def test_str():
     py_type = str
+    expected = "string"
+    assert_schema(py_type, expected)
+
+
+def test_str_annotated():
+    py_type = Annotated[str, ...]
     expected = "string"
     assert_schema(py_type, expected)
 
@@ -77,6 +84,12 @@ def test_int():
     assert_schema(py_type, expected)
 
 
+def test_int_annotated():
+    py_type = Annotated[int, ...]
+    expected = "long"
+    assert_schema(py_type, expected)
+
+
 def test_int_32():
     py_type = int
     expected = "int"
@@ -90,8 +103,20 @@ def test_bool():
     assert_schema(py_type, expected)
 
 
+def test_bool_annotated():
+    py_type = Annotated[bool, ...]
+    expected = "boolean"
+    assert_schema(py_type, expected)
+
+
 def test_float():
     py_type = float
+    expected = "double"
+    assert_schema(py_type, expected)
+
+
+def test_float_annotated():
+    py_type = Annotated[float, ...]
     expected = "double"
     assert_schema(py_type, expected)
 
@@ -115,8 +140,20 @@ def test_none():
     assert_schema(py_type, expected)
 
 
+def test_none_annotated():
+    py_type = Annotated[type(None), ...]
+    expected = "null"
+    assert_schema(py_type, expected)
+
+
 def test_string_list():
     py_type = List[str]
+    expected = {"type": "array", "items": "string"}
+    assert_schema(py_type, expected)
+
+
+def test_string_list_annotated():
+    py_type = Annotated[List[str], ...]
     expected = {"type": "array", "items": "string"}
     assert_schema(py_type, expected)
 
@@ -185,6 +222,12 @@ def test_string_dict():
     assert_schema(py_type, expected)
 
 
+def test_string_dict_annotated():
+    py_type = Annotated[Dict[str, str], ...]
+    expected = {"type": "map", "values": "string"}
+    assert_schema(py_type, expected)
+
+
 def test_string_dict_lower_dict():
     py_type = dict[str, str]
     expected = {"type": "map", "values": "string"}
@@ -210,6 +253,12 @@ def test_string_dict_int_keys():
 
 def test_string_mapping():
     py_type = Mapping[str, str]
+    expected = {"type": "map", "values": "string"}
+    assert_schema(py_type, expected)
+
+
+def test_string_mapping_annotated():
+    py_type = Annotated[Mapping[str, str], ...]
     expected = {"type": "map", "values": "string"}
     assert_schema(py_type, expected)
 
@@ -242,9 +291,22 @@ def test_union_string_int():
     assert_schema(py_type, expected)
 
 
+def test_union_string_int_annotated():
+    py_type = Annotated[Union[str, int], ...]
+    expected = ["string", "long"]
+    assert_schema(py_type, expected)
+
+
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="Requires Python 3.10+")
 def test_union_string_int_py310():
     py_type = str | int
+    expected = ["string", "long"]
+    assert_schema(py_type, expected)
+
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="Requires Python 3.10+")
+def test_union_string_int_py310_annotated():
+    py_type = Annotated[str | int, ...]
     expected = ["string", "long"]
     assert_schema(py_type, expected)
 
@@ -274,6 +336,12 @@ def test_optional_str():
     assert_schema(py_type, expected)
 
 
+def test_optional_str_annotated():
+    py_type = Annotated[Optional[str], ...]
+    expected = ["string", "null"]
+    assert_schema(py_type, expected)
+
+
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="Requires Python 3.10+")
 def test_optional_str_py310():
     py_type = str | None
@@ -296,6 +364,23 @@ def test_enum():
         "default": "RED",
     }
     assert_schema(PyType, expected)
+
+
+def test_enum_annotated():
+    class PyType(enum.Enum):
+        RED = "RED"
+        GREEN = "GREEN"
+
+    expected = {
+        "type": "enum",
+        "name": "PyType",
+        "symbols": [
+            "RED",
+            "GREEN",
+        ],
+        "default": "RED",
+    }
+    assert_schema(Annotated[PyType, ...], expected)
 
 
 def test_enum_str_subclass():

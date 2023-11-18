@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import re
+from typing import Annotated
 
 import pytest
 
@@ -54,6 +55,27 @@ def test_plain_class_with_type_hints():
     }
 
     assert_schema(PyType, expected)
+
+
+def test_plain_class_annotated():
+    class PyType:
+        """A port, not using dataclass"""
+
+        def __init__(self, name: str):
+            self.name = name
+
+    expected = {
+        "type": "record",
+        "name": "PyType",
+        "fields": [
+            {
+                "name": "name",
+                "type": "string",
+            },
+        ],
+    }
+
+    assert_schema(Annotated[PyType, ...], expected)
 
 
 def test_plain_class_no_type_hints():
