@@ -11,6 +11,7 @@
 
 import datetime
 import decimal
+import re
 import uuid
 from typing import Annotated, Any, Dict, List
 
@@ -162,13 +163,23 @@ def test_annotated_decimal_additional_meta():
 
 def test_annotated_decimal_no_meta():
     py_type = Annotated[decimal.Decimal, ...]
-    with pytest.raises(pas.TypeNotSupportedError):
+    with pytest.raises(
+        TypeError,
+        match=re.escape(
+            "typing.Annotated[decimal.Decimal, Ellipsis] is not annotated with a 'py_avro_schema.DecimalMeta' object"
+        ),
+    ):
         assert_schema(py_type, {})
 
 
 def test_annotated_decimal_tuple():
     py_type = Annotated[decimal.Decimal, (5, 2)]
-    with pytest.raises(pas.TypeNotSupportedError):
+    with pytest.raises(
+        TypeError,
+        match=re.escape(
+            "typing.Annotated[decimal.Decimal, (5, 2)] is not annotated with a 'py_avro_schema.DecimalMeta' object"
+        ),
+    ):
         assert_schema(py_type, {})
 
 
