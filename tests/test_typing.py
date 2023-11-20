@@ -24,6 +24,11 @@ def test_decimal_meta():
     assert meta.scale == 2
 
 
+def test_decimal_meta_hashable():
+    meta = DecimalMeta(precision=4, scale=2)
+    assert hash(meta)
+
+
 def test_decimal_default_scale():
     meta = DecimalMeta(precision=4)
     assert meta.precision == 4

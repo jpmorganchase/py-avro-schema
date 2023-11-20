@@ -21,7 +21,7 @@ from typing import Optional, Tuple
 import typeguard
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)  # Needs to be hashable to work in unioned types
 class DecimalMeta:
     """
     Meta data to annotate a :class:`decimal.Decimal` with precision and scale information

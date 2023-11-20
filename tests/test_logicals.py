@@ -13,7 +13,7 @@ import datetime
 import decimal
 import re
 import uuid
-from typing import Annotated, Any, Dict, List
+from typing import Annotated, Any, Dict, List, Union
 
 import pytest
 
@@ -158,6 +158,20 @@ def test_annotated_decimal_additional_meta():
         "precision": 5,
         "scale": 2,
     }
+    assert_schema(py_type, expected)
+
+
+def test_annotated_decimal_in_union():
+    py_type = Union[Annotated[decimal.Decimal, pas.DecimalMeta(precision=5, scale=2)], None]
+    expected = [
+        {
+            "type": "bytes",
+            "logicalType": "decimal",
+            "precision": 5,
+            "scale": 2,
+        },
+        "null",
+    ]
     assert_schema(py_type, expected)
 
 
