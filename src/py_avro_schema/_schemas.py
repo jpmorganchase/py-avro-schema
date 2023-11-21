@@ -472,8 +472,8 @@ class DecimalSchema(Schema):
             try:
                 # At least one of the annotations should be a DecimalMeta object
                 (meta,) = (arg for arg in args[1:] if isinstance(arg, py_avro_schema._typing.DecimalMeta))
-            except ValueError:  # not enough values to unpack
-                raise TypeError(f"{py_type} is not annotated with a 'py_avro_schema.DecimalMeta' object")
+            except ValueError:  # not enough/too many values to unpack
+                raise TypeError(f"{py_type} is not annotated with a single 'py_avro_schema.DecimalMeta' object")
             return meta
         elif origin is decimal.Decimal:
             # Deprecated pas.DecimalType[4, 2]

@@ -180,7 +180,20 @@ def test_annotated_decimal_no_meta():
     with pytest.raises(
         TypeError,
         match=re.escape(
-            "typing.Annotated[decimal.Decimal, Ellipsis] is not annotated with a 'py_avro_schema.DecimalMeta' object"
+            "typing.Annotated[decimal.Decimal, Ellipsis] is not annotated with a single 'py_avro_schema.DecimalMeta' "
+            "object"
+        ),
+    ):
+        assert_schema(py_type, {})
+
+
+def test_annotated_decimal_2_meta():
+    py_type = Annotated[decimal.Decimal, pas.DecimalMeta(precision=5, scale=2), pas.DecimalMeta(precision=4)]
+    with pytest.raises(
+        TypeError,
+        match=re.escape(
+            "typing.Annotated[decimal.Decimal, DecimalMeta(precision=5, scale=2), DecimalMeta(precision=4, scale=None)]"
+            " is not annotated with a single 'py_avro_schema.DecimalMeta' object"
         ),
     ):
         assert_schema(py_type, {})
@@ -191,7 +204,8 @@ def test_annotated_decimal_tuple():
     with pytest.raises(
         TypeError,
         match=re.escape(
-            "typing.Annotated[decimal.Decimal, (5, 2)] is not annotated with a 'py_avro_schema.DecimalMeta' object"
+            "typing.Annotated[decimal.Decimal, (5, 2)] is not annotated with a single 'py_avro_schema.DecimalMeta' "
+            "object"
         ),
     ):
         assert_schema(py_type, {})
