@@ -11,8 +11,9 @@
 
 import datetime
 import decimal
+import re
 import uuid
-from typing import Annotated, Any, Dict, List
+from typing import Annotated, Any, Dict, List, Union
 
 import pytest
 
@@ -149,17 +150,6 @@ def test_annotated_decimal_default_scale():
     assert_schema(py_type, expected)
 
 
-def test_annotated_decimal_neg_scale():
-    py_type = Annotated[decimal.Decimal, pas.DecimalMeta(precision=5, scale=-2)]
-    expected = {
-        "type": "bytes",
-        "logicalType": "decimal",
-        "precision": 5,
-        "scale": -2,
-    }
-    assert_schema(py_type, expected)
-
-
 def test_annotated_decimal_additional_meta():
     py_type = Annotated[decimal.Decimal, "something else", pas.DecimalMeta(precision=5, scale=2)]
     expected = {
@@ -171,15 +161,53 @@ def test_annotated_decimal_additional_meta():
     assert_schema(py_type, expected)
 
 
+def test_annotated_decimal_in_union():
+    py_type = Union[Annotated[decimal.Decimal, pas.DecimalMeta(precision=5, scale=2)], None]
+    expected = [
+        {
+            "type": "bytes",
+            "logicalType": "decimal",
+            "precision": 5,
+            "scale": 2,
+        },
+        "null",
+    ]
+    assert_schema(py_type, expected)
+
+
 def test_annotated_decimal_no_meta():
     py_type = Annotated[decimal.Decimal, ...]
-    with pytest.raises(pas.TypeNotSupportedError):
+    with pytest.raises(
+        TypeError,
+        match=re.escape(
+            "typing.Annotated[decimal.Decimal, Ellipsis] is not annotated with a single 'py_avro_schema.DecimalMeta' "
+            "object"
+        ),
+    ):
+        assert_schema(py_type, {})
+
+
+def test_annotated_decimal_2_meta():
+    py_type = Annotated[decimal.Decimal, pas.DecimalMeta(precision=5, scale=2), pas.DecimalMeta(precision=4)]
+    with pytest.raises(
+        TypeError,
+        match=re.escape(
+            "typing.Annotated[decimal.Decimal, DecimalMeta(precision=5, scale=2), DecimalMeta(precision=4, scale=None)]"
+            " is not annotated with a single 'py_avro_schema.DecimalMeta' object"
+        ),
+    ):
         assert_schema(py_type, {})
 
 
 def test_annotated_decimal_tuple():
     py_type = Annotated[decimal.Decimal, (5, 2)]
-    with pytest.raises(pas.TypeNotSupportedError):
+    with pytest.raises(
+        TypeError,
+        match=re.escape(
+            "typing.Annotated[decimal.Decimal, (5, 2)] is not annotated with a single 'py_avro_schema.DecimalMeta' "
+            "object"
+        ),
+    ):
         assert_schema(py_type, {})
 
 

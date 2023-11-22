@@ -21,7 +21,7 @@ from typing import Optional, Tuple
 import typeguard
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)  # Needs to be hashable to work in unioned types
 class DecimalMeta:
     """
     Meta data to annotate a :class:`decimal.Decimal` with precision and scale information
@@ -38,6 +38,20 @@ class DecimalMeta:
 
     precision: int
     scale: Optional[int] = None
+
+    def __post_init__(self):
+        """
+        Validate input data
+
+        See: https://avro.apache.org/docs/1.11.1/specification/#decimal
+        """
+        if self.precision < 1:
+            raise ValueError(f"Precision must be at least 1. Given value: {self.precision}")
+        if self.scale is not None:
+            if self.scale < 0:
+                raise ValueError(f"Scale must be positive. Given value: {self.scale}")
+            elif self.scale > self.precision:
+                raise ValueError(f"Scale must be no more than precision of {self.precision}. Given value: {self.scale}")
 
 
 class DecimalType:

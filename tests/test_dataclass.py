@@ -625,7 +625,7 @@ def test_namespaced_enum_field():
 def test_decimal_field_default():
     @dataclasses.dataclass
     class PyType:
-        field_a: pas.DecimalType[4, 2] = decimal.Decimal("3.14")
+        field_a: Annotated[decimal.Decimal, pas.DecimalMeta(4, 2)] = decimal.Decimal("3.14")
 
     expected = {
         "type": "record",
@@ -649,7 +649,7 @@ def test_decimal_field_default():
 def test_decimal_field_default_precision_too_big():
     @dataclasses.dataclass
     class PyType:
-        field_a: pas.DecimalType[4, 2] = decimal.Decimal("123.45")
+        field_a: Annotated[decimal.Decimal, pas.DecimalMeta(4, 2)] = decimal.Decimal("123.45")
 
     with pytest.raises(
         ValueError, match="Default value 123.45 has precision 5 which is greater than the schema's precision 4"
@@ -660,7 +660,7 @@ def test_decimal_field_default_precision_too_big():
 def test_decimal_field_default_scale_too_big():
     @dataclasses.dataclass
     class PyType:
-        field_a: pas.DecimalType[4, 2] = decimal.Decimal("1.234")
+        field_a: Annotated[decimal.Decimal, pas.DecimalMeta(4, 2)] = decimal.Decimal("1.234")
 
     with pytest.raises(ValueError, match="Default value 1.234 has scale 3 which is greater than the schema's scale 2"):
         assert_schema(PyType, {})

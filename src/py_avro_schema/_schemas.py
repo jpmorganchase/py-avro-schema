@@ -456,12 +456,11 @@ class DecimalSchema(Schema):
     @classmethod
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
-        try:
-            # A decimal.Decimal type with annotations indicating precision and optionally scale.
-            cls._decimal_meta(py_type)
-            return True
-        except TypeError:
-            return False
+        # Here we are greedy: we catch any decimal.Decimal. However, data() might fail if the annotation is not correct.
+        return (
+            _is_class(py_type, decimal.Decimal)  # Using DecimalMeta
+            or get_origin(py_type) is decimal.Decimal  # Deprecated: DecimalType
+        )
 
     @classmethod
     def _decimal_meta(cls, py_type: Type) -> py_avro_schema._typing.DecimalMeta:
@@ -473,8 +472,8 @@ class DecimalSchema(Schema):
             try:
                 # At least one of the annotations should be a DecimalMeta object
                 (meta,) = (arg for arg in args[1:] if isinstance(arg, py_avro_schema._typing.DecimalMeta))
-            except ValueError:  # not enough values to unpack
-                raise TypeError(f"{py_type} is not annotated with a 'py_avro_schema.DecimalMeta` object")
+            except ValueError:  # not enough/too many values to unpack
+                raise TypeError(f"{py_type} is not annotated with a single 'py_avro_schema.DecimalMeta' object")
             return meta
         elif origin is decimal.Decimal:
             # Deprecated pas.DecimalType[4, 2]
