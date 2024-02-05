@@ -91,7 +91,7 @@ class Option(enum.Flag):
     #: values on Avro record fields to support schema evolution/resolution.
     DEFAULTS_MANDATORY = enum.auto()
 
-    #: Model ``Dict[str, Any]`` fields as string schemas instead of byte schemas (with logical type ``json``, to support
+    #: Model ``Dict[str, Any]``  fields as string schemas instead of byte schemas (with logical type ``json``, to support
     #: JSON serialization inside Avro).
     LOGICAL_JSON_STRING = enum.auto()
 
