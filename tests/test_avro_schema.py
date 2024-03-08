@@ -10,9 +10,11 @@
 # specific language governing permissions and limitations under the License.
 
 import dataclasses
+from typing import Any
 
 import avro.schema
 import orjson
+import pydantic
 
 import py_avro_schema as pas
 
@@ -41,5 +43,45 @@ def test_dataclass_string_field():
         "doc": "My PyType",
     }
     json_data = pas.generate(PyType)
+    assert json_data == orjson.dumps(expected)
+    assert avro.schema.parse(json_data)
+
+
+def test_pydantic_field_default():
+    class Default(pydantic.BaseModel):
+        """My Default"""
+
+        foo: str = "foo"
+
+    class PyType(pydantic.BaseModel):
+        """My PyType"""
+
+        default: Default = pydantic.Field(default_factory=Default)
+
+    def pydantic_serializer(value: Any) -> dict:
+        if isinstance(value, pydantic.BaseModel):
+            return value.model_dump(mode="json")
+        raise TypeError
+
+    expected = {
+        "type": "record",
+        "name": "PyType",
+        "fields": [
+            {
+                "name": "default",
+                "type": {
+                    "type": "record",
+                    "name": "Default",
+                    "fields": [{"name": "foo", "type": "string", "default": "foo"}],
+                    "namespace": "test_avro_schema",
+                    "doc": "My Default",
+                },
+                "default": {"foo": "foo"},
+            }
+        ],
+        "namespace": "test_avro_schema",
+        "doc": "My PyType",
+    }
+    json_data = pas.generate(PyType, orjson_default=pydantic_serializer)
     assert json_data == orjson.dumps(expected)
     assert avro.schema.parse(json_data)

@@ -23,7 +23,7 @@ schema for.
 """
 
 import importlib.metadata
-from typing import Optional, Type
+from typing import Any, Callable, Optional, Type, Union
 
 import memoization
 import orjson
@@ -50,6 +50,7 @@ def generate(
     *,
     namespace: Optional[str] = None,
     options: Option = Option(0),
+    orjson_default: Union[Callable[[Any], Any], None] = None,
 ) -> bytes:
     """
     Return an Avro schema as a JSON-formatted bytestring for a given Python class or instance
@@ -60,11 +61,12 @@ def generate(
     :param namespace: The Avro namespace to add to schemas.
     :param options:   Schema generation options as defined by :class:`Option` enum values. Specify multiple values like
                       this: ``Option.INT_32 | Option.FLOAT_32``.
+    :param orjson_default: A function to serialize custom types with orjson.
     """
     schema_dict = schema(py_type, namespace=namespace, options=options)
     json_options = 0
     for opt in JSON_OPTIONS:
         if opt in options:
             json_options |= opt.value
-    schema_json = orjson.dumps(schema_dict, option=json_options)
+    schema_json = orjson.dumps(schema_dict, option=json_options, default=orjson_default)
     return schema_json
