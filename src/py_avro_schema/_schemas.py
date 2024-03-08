@@ -807,6 +807,10 @@ class RecordField:
             if isinstance(self.schema, UnionSchema):
                 self.schema.sort_item_schemas(self.default)
             typeguard.check_type(self.default, self.py_type)
+
+            # allow to use pydantic models as default values
+            if PydanticSchema.handles_type(default.__class__):
+                self.default = default.model_dump(mode="json")  # type: ignore
         else:
             if Option.DEFAULTS_MANDATORY in self.options:
                 raise TypeError(f"Default value for field {self} is missing")
@@ -900,9 +904,6 @@ class PydanticSchema(RecordSchema):
             docs=py_field.description or "",
             options=self.options,
         )
-        # allow to use pydantic models as default values
-        if PydanticSchema.handles_type(default.__class__):
-            field_obj.default = default.model_dump(mode="json")  # type: ignore
         return field_obj
 
     def _annotation(self, field_name: str) -> Type:
