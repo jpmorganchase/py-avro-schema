@@ -862,6 +862,7 @@ class DataclassSchema(RecordSchema):
             default=default,
             options=self.options,
         )
+
         return field_obj
 
 
@@ -899,6 +900,9 @@ class PydanticSchema(RecordSchema):
             docs=py_field.description or "",
             options=self.options,
         )
+        # allow to use pydantic models as default values
+        if PydanticSchema.handles_type(default.__class__):
+            field_obj.default = default.model_dump(mode="json")  # type: ignore
         return field_obj
 
     def _annotation(self, field_name: str) -> Type:
