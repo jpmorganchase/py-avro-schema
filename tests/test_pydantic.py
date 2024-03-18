@@ -523,3 +523,28 @@ def test_annotated_decimal_overridden():
         ],
     }
     assert_schema(PyType, expected)
+
+
+def test_base_model_defaults():
+    class Default(pydantic.BaseModel):
+        field_a: str = "default_a"
+
+    class PyType(pydantic.BaseModel):
+        default: Default = pydantic.Field(..., default_factory=Default)
+
+    expected = {
+        "fields": [
+            {
+                "default": {"field_a": "default_a"},
+                "name": "default",
+                "type": {
+                    "fields": [{"default": "default_a", "name": "field_a", "type": "string"}],
+                    "name": "Default",
+                    "type": "record",
+                },
+            }
+        ],
+        "name": "PyType",
+        "type": "record",
+    }
+    assert_schema(PyType, expected)

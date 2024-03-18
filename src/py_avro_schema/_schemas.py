@@ -913,6 +913,12 @@ class PydanticSchema(RecordSchema):
                 return class_.__annotations__[field_name]
         raise ValueError(f"{field_name} is not a field of {self.py_type}")  # Should never happen
 
+    def make_default(self, py_default: pydantic.BaseModel) -> Any:
+        """Naive implementation"""
+        # A more correct implementation would recursively serialize all Pydantic fields as per Avro schema
+        # specification. Probably should be implemented using the `make_default` methods.
+        return dict(py_default)
+
 
 class PlainClassSchema(RecordSchema):
     """An Avro record schema for a plain Python class with typed constructor method arguments"""
