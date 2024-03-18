@@ -619,8 +619,9 @@ class UnionSchema(Schema):
 
         # Support for `X | Y` syntax available in Python 3.10+
         # equivalent to `typing.Union[X, Y]`
-        if getattr(types, "UnionType", None):
-            return origin == Union or origin == types.UnionType  # noqa: E721
+        union_type = getattr(types, "UnionType", None)
+        if union_type:
+            return origin == Union or origin == union_type
         return origin == Union
 
     def __init__(self, py_type: Type[Union[Any]], namespace: Optional[str] = None, options: Option = Option(0)):
