@@ -567,7 +567,11 @@ class SequenceSchema(Schema):
             "items": self.items_schema.data(names=names),
         }
 
-    def make_default(self, py_default: Any) -> Any:
+    def make_default(self, py_default: collections.abc.Sequence) -> collections.abc.Sequence:
+        """Return an Avro schema compliant default value for a given Python Sequence
+
+        :param py_default: The Python sequence to generate a default value for.
+        """
         origin = get_origin(self.py_type) or self.py_type
         return origin(self.items_schema.make_default(item) for item in py_default)
 
