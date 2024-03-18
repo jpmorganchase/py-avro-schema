@@ -13,7 +13,7 @@
 [flake8]
 # Flake 8 linting configuration, not supported in pyproject.toml
 
-ignore = E203,W503
+ignore = E203,W503,E701
 max-line-length = 120
 exclude =
   .svn,

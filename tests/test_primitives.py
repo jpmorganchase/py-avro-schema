@@ -44,8 +44,7 @@ def test_str_annotated():
 
 
 def test_str_subclass():
-    class PyType(str):
-        ...
+    class PyType(str): ...
 
     expected = {
         "type": "string",
@@ -55,8 +54,7 @@ def test_str_subclass():
 
 
 def test_str_subclass_namespaced():
-    class PyType(str):
-        ...
+    class PyType(str): ...
 
     expected = {
         "type": "string",
@@ -68,8 +66,7 @@ def test_str_subclass_namespaced():
 def test_str_subclass_other_classes():
     import packaging.version
 
-    class PyType(packaging.version.Version, str):
-        ...
+    class PyType(packaging.version.Version, str): ...
 
     expected = {
         "type": "string",
