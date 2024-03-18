@@ -561,3 +561,37 @@ def test_base_model_defaults():
         "type": "record",
     }
     assert_schema(Nested, expected)
+
+
+def test_nested_base_model_list_default():
+    class Default(pydantic.BaseModel):
+        field_a: List[str] = pydantic.Field(..., default_factory=list)
+
+    class PyType(pydantic.BaseModel):
+        default: Default = pydantic.Field(..., default_factory=Default)
+
+    expected = {
+        "fields": [
+            {
+                "default": {"field_a": []},
+                "name": "default",
+                "type": {
+                    "fields": [
+                        {
+                            "default": [],
+                            "name": "field_a",
+                            "type": {
+                                "type": "array",
+                                "items": "string",
+                            },
+                        }
+                    ],
+                    "name": "Default",
+                    "type": "record",
+                },
+            }
+        ],
+        "name": "PyType",
+        "type": "record",
+    }
+    assert_schema(PyType, expected)
