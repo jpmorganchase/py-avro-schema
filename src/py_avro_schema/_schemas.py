@@ -902,12 +902,9 @@ class PydanticSchema(RecordSchema):
         )
         return field_obj
 
-    def make_default(self, py_default: Any) -> Any:
+    def make_default(self, py_default: pydantic.BaseModel) -> JSONObj:
         """Return an Avro schema compliant default value for a given Python value"""
-        try:
-            return {key: _schema_obj(value.__class__).make_default(value) for key, value in py_default}
-        except TypeNotSupportedError:
-            return py_default
+        return {key: _schema_obj(value.__class__).make_default(value) for key, value in py_default}
 
     def _annotation(self, field_name: str) -> Type:
         """
