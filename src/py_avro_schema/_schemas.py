@@ -567,6 +567,9 @@ class SequenceSchema(Schema):
             "items": self.items_schema.data(names=names),
         }
 
+    def make_default(self, py_default: Any) -> Any:
+        return [_schema_obj(default.__class__).make_default(default) for default in py_default]
+
 
 class DictSchema(Schema):
     """An Avro map schema for a given Python mapping"""
@@ -807,10 +810,6 @@ class RecordField:
             if isinstance(self.schema, UnionSchema):
                 self.schema.sort_item_schemas(self.default)
             typeguard.check_type(self.default, self.py_type)
-
-            # allow to use pydantic models as default values
-            if PydanticSchema.handles_type(default.__class__):
-                self.default = default.model_dump(mode="json")  # type: ignore
         else:
             if Option.DEFAULTS_MANDATORY in self.options:
                 raise TypeError(f"Default value for field {self} is missing")
@@ -905,6 +904,10 @@ class PydanticSchema(RecordSchema):
             options=self.options,
         )
         return field_obj
+
+    def make_default(self, py_default: Any) -> Any:
+        """Return an Avro schema compliant default value for a given Python value"""
+        return {key: _schema_obj(value.__class__).make_default(value) for key, value in py_default}
 
     def _annotation(self, field_name: str) -> Type:
         """
