@@ -567,9 +567,6 @@ class SequenceSchema(Schema):
             "items": self.items_schema.data(names=names),
         }
 
-    def make_default(self, py_default: Any) -> Any:
-        return [_schema_obj(default.__class__).make_default(default) for default in py_default]
-
 
 class DictSchema(Schema):
     """An Avro map schema for a given Python mapping"""
@@ -907,7 +904,10 @@ class PydanticSchema(RecordSchema):
 
     def make_default(self, py_default: Any) -> Any:
         """Return an Avro schema compliant default value for a given Python value"""
-        return {key: _schema_obj(value.__class__).make_default(value) for key, value in py_default}
+        try:
+            return {key: _schema_obj(value.__class__).make_default(value) for key, value in py_default}
+        except TypeNotSupportedError:
+            return py_default
 
     def _annotation(self, field_name: str) -> Type:
         """
