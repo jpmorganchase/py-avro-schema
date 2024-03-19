@@ -834,7 +834,7 @@ def test_sequence_schema_defaults_with_items():
     expected = {
         "fields": [
             {"default": ["foo", "bar"], "name": "field_a", "type": {"items": "string", "type": "array"}},
-            {"default": ("foo", "bar"), "name": "field_b", "type": {"items": "string", "type": "array"}},
+            {"default": ["foo", "bar"], "name": "field_b", "type": {"items": "string", "type": "array"}},
         ],
         "name": "PyType",
         "type": "record",
