@@ -14,7 +14,7 @@ import datetime
 import decimal
 import enum
 import re
-from typing import Annotated, Dict, List, Optional
+from typing import Annotated, Dict, List, Optional, Tuple
 
 import pytest
 import typeguard
@@ -823,3 +823,20 @@ def test_class_docstring_multiline():
         ],
     }
     assert_schema(PyType, expected, do_doc=True)
+
+
+def test_sequence_schema_defaults_with_items():
+    @dataclasses.dataclass
+    class PyType:
+        field_a: List[str] = dataclasses.field(default_factory=lambda: ["foo", "bar"])
+        field_b: Tuple[str, str] = dataclasses.field(default_factory=lambda: ("foo", "bar"))
+
+    expected = {
+        "fields": [
+            {"default": ["foo", "bar"], "name": "field_a", "type": {"items": "string", "type": "array"}},
+            {"default": ["foo", "bar"], "name": "field_b", "type": {"items": "string", "type": "array"}},
+        ],
+        "name": "PyType",
+        "type": "record",
+    }
+    assert_schema(PyType, expected)

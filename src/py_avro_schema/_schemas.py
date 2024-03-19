@@ -567,6 +567,13 @@ class SequenceSchema(Schema):
             "items": self.items_schema.data(names=names),
         }
 
+    def make_default(self, py_default: collections.abc.Sequence) -> JSONArray:
+        """Return an Avro schema compliant default value for a given Python Sequence
+
+        :param py_default: The Python sequence to generate a default value for.
+        """
+        return [self.items_schema.make_default(item) for item in py_default]
+
 
 class DictSchema(Schema):
     """An Avro map schema for a given Python mapping"""
@@ -905,7 +912,7 @@ class PydanticSchema(RecordSchema):
 
     def make_default(self, py_default: pydantic.BaseModel) -> JSONObj:
         """Return an Avro schema compliant default value for a given Python value"""
-        return {key: _schema_obj(value.__class__).make_default(value) for key, value in py_default}
+        return {key: _schema_obj(self._annotation(key)).make_default(value) for key, value in py_default}
 
     def _annotation(self, field_name: str) -> Type:
         """
