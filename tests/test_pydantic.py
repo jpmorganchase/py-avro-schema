@@ -11,7 +11,7 @@
 
 import decimal
 import uuid
-from typing import Annotated, List, Optional
+from typing import Annotated, List, Optional, Union
 
 import pydantic
 import pytest
@@ -589,6 +589,41 @@ def test_nested_base_model_list_default():
                     "name": "Default",
                     "type": "record",
                 },
+            }
+        ],
+        "name": "PyType",
+        "type": "record",
+    }
+    assert_schema(PyType, expected)
+
+
+def test_nested_base_model_union_model_default():
+    class DefaultA(pydantic.BaseModel):
+        field_a: List[str] = pydantic.Field(..., default_factory=list)
+
+    class DefaultB(pydantic.BaseModel):
+        field_b: Union[int, float] = 0.0
+
+    class PyType(pydantic.BaseModel):
+        default: Union[DefaultA, DefaultB] = pydantic.Field(..., default_factory=DefaultA)
+
+    expected = {
+        "fields": [
+            {
+                "default": {"field_a": []},
+                "name": "default",
+                "type": [
+                    {
+                        "fields": [{"default": [], "name": "field_a", "type": {"items": "string", "type": "array"}}],
+                        "name": "DefaultA",
+                        "type": "record",
+                    },
+                    {
+                        "fields": [{"default": 0.0, "name": "field_b", "type": ["double", "long"]}],
+                        "name": "DefaultB",
+                        "type": "record",
+                    },
+                ],
             }
         ],
         "name": "PyType",

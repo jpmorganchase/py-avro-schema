@@ -662,6 +662,11 @@ class UnionSchema(Schema):
             default_item_schema = self.item_schemas.pop(default_index)
             self.item_schemas.insert(0, default_item_schema)
 
+    def make_default(self, py_default: Any) -> JSONType:
+        """Return an Avro schema compliant default value for a given Python value"""
+        # self.item_schemas[0] is the default schema because it gets sorted in sort_item_schemas
+        return self.item_schemas[0].make_default(py_default)
+
 
 # Named schemas --------------------------------------------------------------------------------------------------------
 
