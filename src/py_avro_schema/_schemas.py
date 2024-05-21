@@ -905,7 +905,7 @@ class PydanticSchema(RecordSchema):
         super().__init__(py_type, namespace=namespace, options=options)
         if Option.USE_CLASS_ALIAS in self.options:
             # TODO: Validate that model config's title is a valid Avro record name
-            self.name = py_type.model_config.get("title", self.name)
+            self.name = py_type.model_config.get("title") or self.name
         self.py_fields = py_type.model_fields
         self.record_fields = [self._record_field(name, field) for name, field in self.py_fields.items()]
 
