@@ -426,7 +426,7 @@ def test_field_alias_generator():
     class PyType(pydantic.BaseModel):
         field_a: str
 
-        model_config = {"alias_generator": lambda x: x.upper()}
+        model_config = pydantic.ConfigDict(alias_generator=lambda x: x.upper())
 
     expected = {
         "type": "record",
