@@ -441,6 +441,30 @@ def test_field_alias_generator():
     assert_schema(PyType, expected, options=pas.Option.USE_FIELD_ALIAS)
 
 
+def test_class_title():
+    class PyType(pydantic.BaseModel):
+        model_config = pydantic.ConfigDict(title="PyTitle")
+
+    expected = {
+        "type": "record",
+        "name": "PyTitle",
+        "fields": [],
+    }
+    assert_schema(PyType, expected, options=pas.Option.USE_CLASS_ALIAS)
+
+
+def test_class_title_not_set():
+    class PyType(pydantic.BaseModel):
+        model_config = pydantic.ConfigDict()
+
+    expected = {
+        "type": "record",
+        "name": "PyType",
+        "fields": [],
+    }
+    assert_schema(PyType, expected, options=pas.Option.USE_CLASS_ALIAS)
+
+
 def test_annotated_decimal():
     class PyType(pydantic.BaseModel):
         field_a: Annotated[

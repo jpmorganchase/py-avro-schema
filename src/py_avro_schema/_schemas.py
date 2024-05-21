@@ -108,8 +108,14 @@ class Option(enum.Flag):
     #: Do not populate ``doc`` schema attributes based on Python docstrings
     NO_DOC = enum.auto()
 
-    #: Use the alias specified in a classes ``Field`` instead of the field's name.
-    #: This currently only affects Pydantic Models
+    #: Use an alias specified as part of a class instead of the class name itself.
+    #: This currently affects Pydantic models only.
+    #: See https://docs.pydantic.dev/dev/api/config/#pydantic.config.ConfigDict.title
+    USE_CLASS_ALIAS = enum.auto()
+
+    #: Use the alias specified in a class field instead of the field/attribute name itself.
+    #: This currently affects Pydantic models only.
+    #: See https://docs.pydantic.dev/dev/api/fields/#pydantic.fields.Field
     USE_FIELD_ALIAS = enum.auto()
 
 
@@ -897,6 +903,9 @@ class PydanticSchema(RecordSchema):
         :param options:   Schema generation options.
         """
         super().__init__(py_type, namespace=namespace, options=options)
+        if Option.USE_CLASS_ALIAS in self.options:
+            # TODO: Validate that model config's title is a valid Avro record name
+            self.name = py_type.model_config.get("title", self.name)
         self.py_fields = py_type.model_fields
         self.record_fields = [self._record_field(name, field) for name, field in self.py_fields.items()]
 
