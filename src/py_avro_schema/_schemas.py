@@ -23,6 +23,7 @@ import datetime
 import decimal
 import enum
 import inspect
+import re
 import sys
 import types
 import uuid
@@ -166,6 +167,17 @@ def _schema_obj(py_type: Type, namespace: Optional[str] = None, options: Option 
         if schema_obj:
             return schema_obj
     raise TypeNotSupportedError(f"Cannot generate Avro schema for Python type {py_type}")
+
+
+# See https://avro.apache.org/docs/1.11.1/specification/#names
+_AVRO_NAME_PATTERN = re.compile(r"^[A-Za-z]([A-Za-z0-9_])*$")
+
+
+def validate_name(value: str) -> str:
+    """Validate (and return) whether a given string is a valid Avro name"""
+    if not re.match(_AVRO_NAME_PATTERN, value):
+        raise ValueError(f"'{value}' is not a valid Avro name")
+    return value
 
 
 class Schema(abc.ABC):
@@ -697,6 +709,16 @@ class NamedSchema(Schema):
         return self.fullname
 
     @property
+    def name(self):
+        """Return the schema name"""
+        return self._name
+
+    @name.setter
+    def name(self, value: str):
+        """Validate and set the schema name"""
+        self._name = validate_name(value)
+
+    @property
     def fullname(self):
         """The schema's full name including the namespace if set"""
         if self.namespace:
@@ -904,7 +926,6 @@ class PydanticSchema(RecordSchema):
         """
         super().__init__(py_type, namespace=namespace, options=options)
         if Option.USE_CLASS_ALIAS in self.options:
-            # TODO: Validate that model config's title is a valid Avro record name
             self.name = py_type.model_config.get("title") or self.name
         self.py_fields = py_type.model_fields
         self.record_fields = [self._record_field(name, field) for name, field in self.py_fields.items()]

@@ -465,6 +465,14 @@ def test_class_title_not_set():
     assert_schema(PyType, expected, options=pas.Option.USE_CLASS_ALIAS)
 
 
+def test_class_title_with_space():
+    class PyType(pydantic.BaseModel):
+        model_config = pydantic.ConfigDict(title="Py Title")
+
+    with pytest.raises(ValueError, match="'Py Title' is not a valid Avro name"):
+        assert_schema(PyType, {}, options=pas.Option.USE_CLASS_ALIAS)
+
+
 def test_annotated_decimal():
     class PyType(pydantic.BaseModel):
         field_a: Annotated[
