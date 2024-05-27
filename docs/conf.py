@@ -40,6 +40,8 @@ extensions = [
 
 html_theme = "sphinx_rtd_theme"
 
+add_module_names = False
+
 autosectionlabel_prefix_document = True
 
 intersphinx_mapping = {

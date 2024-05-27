@@ -1,7 +1,7 @@
-API Documentation
-=================
+API reference documentation
+===========================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    py_avro_schema
