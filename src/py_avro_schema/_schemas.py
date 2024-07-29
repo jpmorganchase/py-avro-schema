@@ -914,7 +914,7 @@ class PydanticSchema(RecordSchema):
     def handles_type(cls, py_type: Type) -> bool:
         """Whether this schema class can represent a given Python class"""
         py_type = _type_from_annotated(py_type)
-        return hasattr(py_type, "__fields__")
+        return hasattr(py_type, "__pydantic_private__")
 
     def __init__(self, py_type: Type[pydantic.BaseModel], namespace: Optional[str] = None, options: Option = Option(0)):
         """
@@ -973,7 +973,7 @@ class PlainClassSchema(RecordSchema):
             # Dataclasses are handled above
             not dataclasses.is_dataclass(py_type)
             # Pydantic models are handled above
-            and not hasattr(py_type, "__fields__")
+            and not hasattr(py_type, "__pydantic_private__")
             # If we are subclassing a string, used the "named string" approach
             and (inspect.isclass(py_type) and not issubclass(py_type, str))
             # Any other class with __init__ with typed args
