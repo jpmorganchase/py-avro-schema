@@ -354,9 +354,11 @@ def test_union_of_union_string_int():
 
 def test_literal_different_types():
     py_type = Literal["", 42]
-    expected = {}
-    with pytest.raises(pas.TypeNotSupportedError):
-        assert_schema(py_type, expected)
+    with pytest.raises(
+        TypeError,
+        match=re.escape("Cannot generate Avro schema for Python typing.Literal with mixed type values"),
+    ):
+        py_avro_schema._schemas.schema(py_type)
 
 
 def test_optional_str():
