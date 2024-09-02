@@ -34,7 +34,9 @@ from typing import (
     Dict,
     ForwardRef,
     List,
+    Literal,
     Optional,
+    Set,
     Tuple,
     Type,
     Union,
@@ -307,6 +309,41 @@ class StrSubclassSchema(Schema):
             "type": "string",
             "namedString": fullname,  # Custom property since "string" is not a named schema in Avro schema spec
         }
+
+
+class LiteralSchema(Schema):
+    """An Avro schema of any type for a Python Literal type, e.g. Literal[""]"""
+
+    def __init__(self, py_type: Type[Any], namespace: Optional[str] = None, options: Option = Option(0)):
+        """
+        An Avro schema of any type for a Python Literal type, e.g. Literal[""]
+
+        :param py_type:   The Python class to generate a schema for.
+        :param namespace: The Avro namespace to add to schemas.
+        :param options:   Schema generation options.
+        """
+        super().__init__(py_type, namespace=namespace, options=options)
+        py_type = _type_from_annotated(py_type)
+        literal_type = self._literal_value_types(py_type).pop()
+        self.literal_value_schema = _schema_obj(literal_type, namespace=namespace, options=options)
+
+    @classmethod
+    def handles_type(cls, py_type: Type[Any]) -> bool:
+        """Whether this schema class can represent a given Python class"""
+        py_type = _type_from_annotated(py_type)
+        literal_value_types = cls._literal_value_types(py_type)
+        # For now we support Literals with the same type only. Potentially we could explose multiple literal types into
+        # an Avro Union schema, but that may not be something that anyone would every want to use...
+        return get_origin(py_type) is Literal and len(literal_value_types) == 1
+
+    def data(self, names: NamesType) -> JSONType:
+        """Return the schema data"""
+        return self.literal_value_schema.data(names=names)
+
+    @staticmethod
+    def _literal_value_types(py_type) -> Set[Type[Any]]:
+        """Return the Python types corresponding to the literal values"""
+        return {type(literal_value) for literal_value in get_args(py_type)}
 
 
 class DictAsJSONSchema(Schema):
