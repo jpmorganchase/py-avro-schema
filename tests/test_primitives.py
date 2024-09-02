@@ -16,6 +16,7 @@ from typing import (
     Annotated,
     Dict,
     List,
+    Literal,
     Mapping,
     MutableSequence,
     Optional,
@@ -75,6 +76,24 @@ def test_str_subclass_other_classes():
     assert_schema(PyType, expected)
 
 
+def test_str_literal():
+    py_type = Literal[""]
+    expected = "string"
+    assert_schema(py_type, expected)
+
+
+def test_str_literal_multiple():
+    py_type = Literal["", "Hello, Python"]
+    expected = "string"
+    assert_schema(py_type, expected)
+
+
+def test_str_literal_annotated():
+    py_type = Annotated[Literal[""], ...]
+    expected = "string"
+    assert_schema(py_type, expected)
+
+
 def test_int():
     py_type = int
     expected = "long"
@@ -92,6 +111,12 @@ def test_int_32():
     expected = "int"
     options = pas.Option.INT_32
     assert_schema(py_type, expected, options=options)
+
+
+def test_int_literal():
+    py_type = Literal[42]
+    expected = "long"
+    assert_schema(py_type, expected)
 
 
 def test_bool():
@@ -325,6 +350,13 @@ def test_union_of_union_string_int():
     py_type = Union[str, Union[str, int]]
     expected = ["string", "long"]
     assert_schema(py_type, expected)
+
+
+def test_literal_different_types():
+    py_type = Literal["", 42]
+    expected = {}
+    with pytest.raises(pas.TypeNotSupportedError):
+        assert_schema(py_type, expected)
 
 
 def test_optional_str():
