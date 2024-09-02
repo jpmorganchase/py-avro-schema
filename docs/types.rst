@@ -488,6 +488,14 @@ Outputs as:
    }
 
 
+:class:`typing.Literal`
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Avro schema: schema corresponding to the type of the literal value, e.g. ``string``, ``long`` etc.
+
+Mixed types, e.g. ``Literal["", 42]`` are not supported.
+
+
 :class:`uuid.UUID`
 ~~~~~~~~~~~~~~~~~~
 
