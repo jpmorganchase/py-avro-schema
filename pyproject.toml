@@ -52,6 +52,7 @@ requires-python = ">=3.9"
 dependencies = [
     "avro~=1.10",
     "memoization~=0.4",
+    "more-itertools~=10.0",
     "orjson~=3.5",
     "typeguard~=4.0",
 ]
