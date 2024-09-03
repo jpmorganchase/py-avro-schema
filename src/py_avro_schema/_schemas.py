@@ -699,13 +699,15 @@ class UnionSchema(Schema):
 
     def data(self, names: NamesType) -> JSONArray:
         """Return the schema data"""
-        unique_schemas = list(
-            more_itertools.unique_everseen(item_schema.data(names=names) for item_schema in self.item_schemas)
-        )
-        if len(unique_schemas) == 1:
-            return unique_schemas[0]
-        else:
+        # Render the item schemas
+        schemas = (item_schema.data(names=names) for item_schema in self.item_schemas)
+        # We need to deduplicate the schemas **after** rendering. This is because **different** Python types might
+        # result in the **same** Avro schema. Preserving order as order may be significant in an Avro schema.
+        unique_schemas = list(more_itertools.unique_everseen(schemas))
+        if len(unique_schemas) > 1:
             return unique_schemas
+        else:
+            return unique_schemas[0]
 
     def sort_item_schemas(self, default_value: Any) -> None:
         """Re-order the union's schemas such that the first item corresponds with a record field's default value"""
