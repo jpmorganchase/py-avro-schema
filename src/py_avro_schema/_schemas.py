@@ -44,6 +44,7 @@ from typing import (
     get_type_hints,
 )
 
+import more_itertools
 import orjson
 import typeguard
 
@@ -698,7 +699,13 @@ class UnionSchema(Schema):
 
     def data(self, names: NamesType) -> JSONArray:
         """Return the schema data"""
-        return [schema.data(names=names) for schema in self.item_schemas]
+        unique_schemas = list(
+            more_itertools.unique_everseen(item_schema.data(names=names) for item_schema in self.item_schemas)
+        )
+        if len(unique_schemas) == 1:
+            return unique_schemas[0]
+        else:
+            return unique_schemas
 
     def sort_item_schemas(self, default_value: Any) -> None:
         """Re-order the union's schemas such that the first item corresponds with a record field's default value"""

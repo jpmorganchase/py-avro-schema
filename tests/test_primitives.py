@@ -352,6 +352,18 @@ def test_union_of_union_string_int():
     assert_schema(py_type, expected)
 
 
+def test_union_str_str():
+    py_type = Union[str, str]
+    expected = "string"
+    assert_schema(py_type, expected)
+
+
+def test_union_str_annotated_str():
+    py_type = Union[str, Annotated[str, ...]]
+    expected = "string"
+    assert_schema(py_type, expected)
+
+
 def test_literal_different_types():
     py_type = Literal["", 42]
     with pytest.raises(
