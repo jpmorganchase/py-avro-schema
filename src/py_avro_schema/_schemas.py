@@ -697,7 +697,7 @@ class UnionSchema(Schema):
         args = get_args(py_type)
         self.item_schemas = [_schema_obj(arg, namespace=namespace, options=options) for arg in args]
 
-    def data(self, names: NamesType) -> JSONArray:
+    def data(self, names: NamesType) -> JSONType:
         """Return the schema data"""
         # Render the item schemas
         schemas = (item_schema.data(names=names) for item_schema in self.item_schemas)
