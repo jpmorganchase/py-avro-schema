@@ -55,6 +55,11 @@ if TYPE_CHECKING:
     import pydantic
     import pydantic.fields
 
+if sys.version_info >= (3, 10):
+    from typing import is_typeddict
+else:
+    from typing_extensions import is_typeddict
+
 JSONStr = str
 JSONObj = Dict[str, Any]
 JSONArray = List[Any]
@@ -940,7 +945,7 @@ class DataclassSchema(RecordSchema):
         if callable(py_field.default_factory):  # type: ignore
             default = py_field.default_factory()  # type: ignore
         field_obj = RecordField(
-            py_type=py_field.type,
+            py_type=py_field.type,  # type: ignore
             name=py_field.name,
             namespace=self.namespace_override,
             default=default,
@@ -1045,6 +1050,38 @@ class PlainClassSchema(RecordSchema):
             name=py_field.name,
             namespace=self.namespace_override,
             default=default,
+            options=self.options,
+        )
+        return field_obj
+
+
+class TypedDictSchema(RecordSchema):
+    """An Avro record schema for Python TypedDicts. Uses `get_type_hints` for extract the fields."""
+
+    @classmethod
+    def handles_type(cls, py_type: Type) -> bool:
+        """Whether this schema can represent a TypedDict"""
+        return is_typeddict(py_type)
+
+    def __init__(self, py_type: Type, namespace: str | None = None, options: Option = Option(0)):
+        """
+        An Avro record schema for a given Python TypedDict
+
+        :param py_type:   The Python class to generate a schema for.
+        :param namespace: The Avro namespace to add to schemas.
+        :param options:   Schema generation options.
+        """
+        super().__init__(py_type, namespace=namespace, options=options)
+        py_type = _type_from_annotated(py_type)
+        self.py_fields: dict[str, Type] = get_type_hints(py_type)
+        self.record_fields = [self._record_field(field) for field in self.py_fields.items()]
+
+    def _record_field(self, py_field: tuple[str, Type]) -> RecordField:
+        """Return an Avro record field object for a given TypedDict field"""
+        field_obj = RecordField(
+            py_type=py_field[1],
+            name=py_field[0],
+            namespace=self.namespace_override,
             options=self.options,
         )
         return field_obj
