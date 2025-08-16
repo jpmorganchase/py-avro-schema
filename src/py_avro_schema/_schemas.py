@@ -24,7 +24,6 @@ import decimal
 import enum
 import inspect
 import re
-import sys
 import types
 import uuid
 from typing import (
@@ -125,6 +124,27 @@ class Option(enum.Flag):
 JSON_OPTIONS = [opt for opt in Option if opt.name and opt.name.startswith("JSON_")]
 
 
+_SCHEMA_CLASSES = []
+
+
+def register_schema(cls):
+    """
+    Decorator to register a class as a known ``Schema``
+
+    Schema classes are instantiated when calling ``schema``. Example use::
+
+      @register_schema
+      class MySchema(Schema):
+          @classmethod
+          def handles_type(cls, py_type: Type) -> bool:
+              ...
+          ...
+
+    """
+    _SCHEMA_CLASSES.append(cls)
+    return cls
+
+
 def schema(
     py_type: Type,
     namespace: Optional[str] = None,
@@ -158,12 +178,7 @@ def _schema_obj(py_type: Type, namespace: Optional[str] = None, options: Option 
     :param options:   Schema generation options.
     """
     # Find concrete Schema subclasses defined in the current module
-    # TODO: make this pluggable and accept additional classes
-    schema_classes = inspect.getmembers(
-        sys.modules[__name__],
-        lambda obj: inspect.isclass(obj) and issubclass(obj, Schema) and not inspect.isabstract(obj),
-    )
-    for _, schema_class in schema_classes:
+    for schema_class in _SCHEMA_CLASSES:
         # Find the first schema class that handles py_type
         schema_obj = schema_class(py_type, namespace=namespace, options=options)  # type: ignore
         if schema_obj:
@@ -246,6 +261,7 @@ class Schema(abc.ABC):
         return py_default
 
 
+@register_schema
 class PrimitiveSchema(Schema):
     """An Avro primitive schema for a given Python type"""
 
@@ -286,6 +302,7 @@ class PrimitiveSchema(Schema):
             )
 
 
+@register_schema
 class StrSubclassSchema(Schema):
     """An Avro string schema for a Python subclass of str, with a custom property referencing the class' fullname"""
 
@@ -311,6 +328,7 @@ class StrSubclassSchema(Schema):
         }
 
 
+@register_schema
 class LiteralSchema(Schema):
     """An Avro schema of any type for a Python Literal type, e.g. ``Literal[""]``"""
 
@@ -344,6 +362,7 @@ class LiteralSchema(Schema):
         return self.literal_value_schema.data(names=names)
 
 
+@register_schema
 class DictAsJSONSchema(Schema):
     """An Avro string schema representing a Python Dict[str, Any] or List[Dict[str, Any]] assuming JSON serialization"""
 
@@ -365,6 +384,7 @@ class DictAsJSONSchema(Schema):
         return orjson.dumps(py_default).decode()
 
 
+@register_schema
 class UUIDSchema(Schema):
     """An Avro string schema representing a Python UUID object"""
 
@@ -391,6 +411,7 @@ class UUIDSchema(Schema):
         return ""
 
 
+@register_schema
 class DateSchema(Schema):
     """An Avro logical type date schema for a given Python date type"""
 
@@ -408,6 +429,7 @@ class DateSchema(Schema):
         return (py_default - datetime.date(1970, 1, 1)).days
 
 
+@register_schema
 class TimeSchema(Schema):
     """An Avro logical type time (microseconds precision) schema for a given Python time type"""
 
@@ -433,6 +455,7 @@ class TimeSchema(Schema):
         return int((dt2 - dt1).total_seconds() * 1e6)
 
 
+@register_schema
 class DateTimeSchema(Schema):
     """An Avro logical type timestamp (microseconds precision) schema for a given Python datetime type"""
 
@@ -453,6 +476,7 @@ class DateTimeSchema(Schema):
         return int((py_default - datetime.datetime.fromtimestamp(0, tz=datetime.timezone.utc)).total_seconds() * 1e6)
 
 
+@register_schema
 class TimeDeltaSchema(Schema):
     """An Avro logical type duration schema for a given Python timedelta type"""
 
@@ -478,6 +502,7 @@ class TimeDeltaSchema(Schema):
         )
 
 
+@register_schema
 class ForwardSchema(Schema):
     """A forward/circular reference which in Avro is just the schema name"""
 
@@ -495,6 +520,7 @@ class ForwardSchema(Schema):
             return self.py_type.__forward_arg__  # Or using a ForwardRef object containing the same string literal
 
 
+@register_schema
 class DecimalSchema(Schema):
     """
     An Avro bytes, logical decimal schema for a Python :class:`decimal.Decimal`
@@ -585,6 +611,7 @@ class DecimalSchema(Schema):
 # Recursive schemas ----------------------------------------------------------------------------------------------------
 
 
+@register_schema
 class SequenceSchema(Schema):
     """An Avro array schema for a given Python sequence"""
 
@@ -628,6 +655,7 @@ class SequenceSchema(Schema):
         return [self.items_schema.make_default(item) for item in py_default]
 
 
+@register_schema
 class DictSchema(Schema):
     """An Avro map schema for a given Python mapping"""
 
@@ -668,6 +696,7 @@ class DictSchema(Schema):
         }
 
 
+@register_schema
 class UnionSchema(Schema):
     """An Avro union schema for a given Python union type"""
 
@@ -782,6 +811,7 @@ class NamedSchema(Schema):
         """Return the schema data"""
 
 
+@register_schema
 class EnumSchema(NamedSchema):
     """An Avro enum schema for a Python enum with string values"""
 
@@ -912,6 +942,7 @@ class RecordField:
         return field_data
 
 
+@register_schema
 class DataclassSchema(RecordSchema):
     """An Avro record schema for a given Python dataclass"""
 
@@ -950,6 +981,7 @@ class DataclassSchema(RecordSchema):
         return field_obj
 
 
+@register_schema
 class PydanticSchema(RecordSchema):
     """An Avro record schema for a given Pydantic model class"""
 
@@ -1005,6 +1037,7 @@ class PydanticSchema(RecordSchema):
         raise ValueError(f"{field_name} is not a field of {self.py_type}")  # Should never happen
 
 
+@register_schema
 class PlainClassSchema(RecordSchema):
     """An Avro record schema for a plain Python class with typed constructor method arguments"""
 
