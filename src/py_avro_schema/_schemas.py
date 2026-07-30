@@ -26,6 +26,7 @@ import inspect
 import re
 import sys
 import types
+import typing
 import uuid
 from typing import (
     TYPE_CHECKING,
@@ -1100,3 +1101,37 @@ def _type_from_annotated(py_type: Type) -> Type:
         return args[0]
     else:
         return py_type
+
+
+class TypedDictSchema(RecordSchema):
+    """An Avro record schema for a given Python TypedDict class."""
+
+    @classmethod
+    def handles_type(cls, py_type: Type) -> bool:
+        """Whether this schema class can represent a given Python class"""
+        py_type = _type_from_annotated(py_type)
+
+        # Use Python 3.10+ standard check for TypedDicts if available
+        if hasattr(typing, "is_typeddict"):
+            return typing.is_typeddict(py_type)
+
+        # Fallback for older Python versions
+        return isinstance(py_type, type(typing.TypedDict("T", {})))
+
+    def __init__(self, py_type: Type, namespace: Optional[str] = None, options: Option = Option(0)):
+        """An Avro record schema for a given Python TypedDict."""
+        super().__init__(py_type, namespace=namespace, options=options)
+
+        py_type = _type_from_annotated(py_type)
+        self.py_fields = [(k, v) for k, v in py_type.__annotations__.items()]
+        self.record_fields = [self._record_field(field) for field in self.py_fields]
+
+    def _record_field(self, py_field: tuple[str, Type]) -> RecordField:
+        """Return an Avro record field object for a given annotation field"""
+        field_obj = RecordField(
+            py_type=py_field[1],
+            name=py_field[0],
+            namespace=self.namespace_override,
+            options=self.options,
+        )
+        return field_obj

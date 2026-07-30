@@ -10,11 +10,14 @@
 # specific language governing permissions and limitations under the License.
 
 import decimal
+import json
 import re
+from typing import TypedDict
 
 import pytest
 import typeguard
 
+import py_avro_schema as pas
 from py_avro_schema._typing import DecimalMeta, DecimalType
 
 
@@ -84,3 +87,26 @@ def test_precision_lt_scale():
 def test_bad_indexing():
     with pytest.raises(typeguard.TypeCheckError, match=re.escape('argument "params" (int) is not a tuple')):
         DecimalType[4]
+
+
+def test_typeddict_schema():
+    class MyTypedDict(TypedDict):
+        """My test typed dict."""
+
+        x: int
+        y: int
+        z: int
+
+    expected_schema = {
+        "type": "record",
+        "name": "MyTypedDict",
+        "namespace": "test_typing",
+        "doc": "My test typed dict.",
+        "fields": [
+            {"name": "x", "type": "long"},
+            {"name": "y", "type": "long"},
+            {"name": "z", "type": "long"},
+        ],
+    }
+
+    assert json.loads(pas.generate(MyTypedDict)) == expected_schema
