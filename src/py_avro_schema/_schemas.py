@@ -23,6 +23,7 @@ import datetime
 import decimal
 import enum
 import inspect
+import math
 import re
 import sys
 import types
@@ -906,7 +907,16 @@ class RecordField:
             "type": self.schema.data(names=names),
         }
         if self.default != dataclasses.MISSING:
-            field_data["default"] = self.schema.make_default(self.default)
+            default_value = self.schema.make_default(self.default)
+
+            # Convert non-finite floats to Avro-compliant strings
+            if isinstance(default_value, float):
+                if math.isinf(default_value):
+                    default_value = "Infinity" if default_value > 0 else "-Infinity"
+                elif math.isnan(default_value):
+                    default_value = "NaN"
+
+            field_data["default"] = default_value
         if self.docs and Option.NO_DOC not in self.options:
             field_data["doc"] = self.docs
         return field_data
