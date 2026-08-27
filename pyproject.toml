@@ -51,7 +51,6 @@ requires-python = ">=3.9"
 # All runtime dependencies that must be packaged, pin major version only.
 dependencies = [
     "avro~=1.10",
-    "memoization~=0.4",
     "more-itertools~=10.0",
     "orjson~=3.5",
     "typeguard~=4.0",
