@@ -23,9 +23,9 @@ schema for.
 """
 
 import importlib.metadata
+from functools import cache
 from typing import Optional, Type
 
-import memoization
 import orjson
 
 from py_avro_schema._schemas import JSON_OPTIONS, Option, TypeNotSupportedError, schema
@@ -44,7 +44,7 @@ __all__ = [
 ]
 
 
-@memoization.cached
+@cache
 def generate(
     py_type: Type,
     *,
