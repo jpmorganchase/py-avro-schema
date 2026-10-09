@@ -662,3 +662,66 @@ def test_nested_base_model_union_model_default():
         "type": "record",
     }
     assert_schema(PyType, expected)
+
+
+def test_future_annotations_inherited_across_modules(tmp_path, monkeypatch):
+    import importlib
+    import json
+
+    import avro.schema
+
+    package = tmp_path / "future_annotations_repro"
+    package.mkdir()
+    (package / "__init__.py").write_text("")
+    (package / "base.py").write_text(
+        "from __future__ import annotations\n"
+        "import decimal\n"
+        "from typing import Annotated\n"
+        "from pydantic import BaseModel\n"
+        "from py_avro_schema import DecimalMeta\n"
+        "\n"
+        "class Base(BaseModel):\n"
+        "    name: str = ''\n"
+        "    amount: Annotated[decimal.Decimal, DecimalMeta(4, 2)]\n"
+    )
+    (package / "derived.py").write_text("from .base import Base\n" "\n" "class Derived(Base):\n" "    pass\n")
+    monkeypatch.syspath_prepend(str(tmp_path))
+    module = importlib.import_module("future_annotations_repro.derived")
+
+    schema_json = pas.generate(module.Derived, options=pas.Option.NO_DOC).decode()
+    schema = json.loads(schema_json)
+    assert schema["fields"] == [
+        {"name": "name", "type": "string", "default": ""},
+        {
+            "name": "amount",
+            "type": {
+                "type": "bytes",
+                "logicalType": "decimal",
+                "precision": 4,
+                "scale": 2,
+            },
+        },
+    ]
+    avro.schema.parse(schema_json)
+
+
+def test_future_annotations_self_reference(tmp_path, monkeypatch):
+    import importlib
+    import json
+
+    import avro.schema
+
+    (tmp_path / "future_self_reference_repro.py").write_text(
+        "from __future__ import annotations\n"
+        "from pydantic import BaseModel\n"
+        "\n"
+        "class Node(BaseModel):\n"
+        "    child: Node\n"
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+    module = importlib.import_module("future_self_reference_repro")
+
+    schema_json = pas.generate(module.Node, options=pas.Option.NO_DOC).decode()
+    schema = json.loads(schema_json)
+    assert schema["fields"] == [{"name": "child", "type": "Node"}]
+    avro.schema.parse(schema_json)

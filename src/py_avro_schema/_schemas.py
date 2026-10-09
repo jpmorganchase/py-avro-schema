@@ -994,15 +994,16 @@ class PydanticSchema(RecordSchema):
 
     def _annotation(self, field_name: str) -> Type:
         """
-        Fetch the raw annotation for a given field name
+        Return the resolved field annotation, preserving Annotated metadata.
 
-        Pydantic "unpacks" annotated and forward ref types in their FieldInfo API. We need to access to full, raw
-        annotated type hints instead.
+        Pydantic resolves postponed annotations and inherited fields. Rebuild the annotation from its FieldInfo
+        to retain metadata such as DecimalMeta.
         """
-        for class_ in self.py_type.mro():
-            if class_.__annotations__.get(field_name):
-                return class_.__annotations__[field_name]
-        raise ValueError(f"{field_name} is not a field of {self.py_type}")  # Should never happen
+        annotation = self.py_fields[field_name].rebuild_annotation()
+        if _type_from_annotated(annotation) is self.py_type:
+            # Keep self-references symbolic to avoid constructing the same record recursively.
+            return ForwardRef(self.name)
+        return annotation
 
 
 class PlainClassSchema(RecordSchema):
